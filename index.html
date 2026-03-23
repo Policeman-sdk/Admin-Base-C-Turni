@@ -127,13 +127,44 @@ body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSys
       <h1>C-Turni Admin</h1>
       <p>Pannello di controllo riservato</p>
     </div>
-    <div class="fg"><label>Email</label><input class="fc" type="email" id="l-email" placeholder="admin@email.com" autocomplete="email"></div>
-    <div class="fg"><label>Password</label><input class="fc" type="password" id="l-pw" placeholder="••••••••" autocomplete="current-password"></div>
-    <div class="err-msg" id="l-err">Accesso negato. Verifica le credenziali.</div>
-    <button class="btn btn-p btn-full" style="margin-top:8px" onclick="doLogin()">
-      <span id="l-spinner" style="display:none" class="spinner"></span>
-      <span id="l-txt">Accedi</span>
-    </button>
+    <!-- TAB -->
+    <div style="display:flex;background:var(--bg);border-radius:var(--radius-sm);padding:3px;margin-bottom:20px">
+      <button id="tab-login" onclick="switchTab('login')"
+        style="flex:1;padding:8px;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;background:var(--card);color:var(--txt);box-shadow:var(--shadow)">
+        Accedi
+      </button>
+      <button id="tab-reg" onclick="switchTab('reg')"
+        style="flex:1;padding:8px;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;background:transparent;color:var(--txt2)">
+        Registrati
+      </button>
+    </div>
+
+    <!-- FORM LOGIN -->
+    <div id="form-login">
+      <div class="fg"><label>Email</label><input class="fc" type="email" id="l-email" placeholder="admin@email.com" autocomplete="email"></div>
+      <div class="fg"><label>Password</label><input class="fc" type="password" id="l-pw" placeholder="••••••••" autocomplete="current-password"></div>
+      <div class="err-msg" id="l-err">Accesso negato. Verifica le credenziali.</div>
+      <button class="btn btn-p btn-full" style="margin-top:8px" onclick="doLogin()">
+        <span id="l-spinner" style="display:none" class="spinner"></span>
+        <span id="l-txt">Accedi</span>
+      </button>
+    </div>
+
+    <!-- FORM REGISTRAZIONE -->
+    <div id="form-reg" style="display:none">
+      <div class="fg"><label>Email</label><input class="fc" type="email" id="r-email" placeholder="tuaemail@esempio.com" autocomplete="email"></div>
+      <div class="fg"><label>Password</label><input class="fc" type="password" id="r-pw" placeholder="Min. 6 caratteri" autocomplete="new-password"></div>
+      <div class="fg"><label>Conferma password</label><input class="fc" type="password" id="r-pw2" placeholder="Ripeti la password" autocomplete="new-password"></div>
+      <div class="fg"><label>Codice di invito</label><input class="fc" type="password" id="r-code" placeholder="Codice riservato"></div>
+      <div class="err-msg" id="r-err">Errore registrazione.</div>
+      <button class="btn btn-p btn-full" style="margin-top:8px" onclick="doRegister()">
+        <span id="r-spinner" style="display:none" class="spinner"></span>
+        <span id="r-txt">Crea account</span>
+      </button>
+      <p style="font-size:11px;color:var(--txt3);text-align:center;margin-top:12px">
+        Il codice di invito è necessario per creare un account admin.
+      </p>
+    </div>
   </div>
 </div>
 
@@ -267,7 +298,8 @@ onAuthStateChanged(auth, async function(user) {
   // Verifica superadmin
   try {
     const snap = await getDoc(doc(db, 'utenti', user.uid));
-    const data = snap.exists() ? snap.data() : null;
+    const snap2 = await getDoc(doc(db, 'admin_utenti', user.uid));
+    const data = (snap.exists() ? snap.data() : null) || (snap2.exists() ? snap2.data() : null);
     if(!data || data.ruolo !== 'superadmin') {
       toast('Accesso negato: non sei un superadmin', 'err');
       await signOut(auth); showLogin(); return;
@@ -297,6 +329,71 @@ window.doLogin = async function() {
 };
 
 document.getElementById('l-pw').addEventListener('keydown', function(e){ if(e.key==='Enter') window.doLogin(); });
+
+// ── Tab switch ──
+window.switchTab = function(tab) {
+  const isLogin = tab === 'login';
+  document.getElementById('form-login').style.display = isLogin ? 'block' : 'none';
+  document.getElementById('form-reg').style.display   = isLogin ? 'none'  : 'block';
+  const tl = document.getElementById('tab-login');
+  const tr = document.getElementById('tab-reg');
+  tl.style.background   = isLogin ? 'var(--card)' : 'transparent';
+  tl.style.color        = isLogin ? 'var(--txt)'  : 'var(--txt2)';
+  tl.style.boxShadow    = isLogin ? 'var(--shadow)' : 'none';
+  tr.style.background   = isLogin ? 'transparent' : 'var(--card)';
+  tr.style.color        = isLogin ? 'var(--txt2)' : 'var(--txt)';
+  tr.style.boxShadow    = isLogin ? 'none' : 'var(--shadow)';
+  document.getElementById('l-err').classList.remove('on');
+  document.getElementById('r-err').classList.remove('on');
+};
+
+// ── Registrazione ──
+const INVITE_CODE = 'CTAdmin2026';   // ← cambia questo codice quando vuoi
+
+window.doRegister = async function() {
+  const email   = document.getElementById('r-email').value.trim();
+  const pw      = document.getElementById('r-pw').value;
+  const pw2     = document.getElementById('r-pw2').value;
+  const code    = document.getElementById('r-code').value;
+  const errEl   = document.getElementById('r-err');
+  const spin    = document.getElementById('r-spinner');
+  const txt     = document.getElementById('r-txt');
+  errEl.classList.remove('on');
+
+  if(!ALLOWED_EMAILS.includes(email) && code !== INVITE_CODE) {
+    errEl.textContent = 'Email non autorizzata o codice di invito errato.';
+    errEl.classList.add('on'); return;
+  }
+  if(code !== INVITE_CODE) {
+    errEl.textContent = 'Codice di invito errato.';
+    errEl.classList.add('on'); return;
+  }
+  if(pw.length < 6) {
+    errEl.textContent = 'La password deve essere di almeno 6 caratteri.';
+    errEl.classList.add('on'); return;
+  }
+  if(pw !== pw2) {
+    errEl.textContent = 'Le password non coincidono.';
+    errEl.classList.add('on'); return;
+  }
+
+  spin.style.display = 'inline-block'; txt.textContent = 'Creazione...';
+  try {
+    const { createUserWithEmailAndPassword } = await import("https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js");
+    const { setDoc, doc: fsDoc } = await import("https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js");
+    const cred = await createUserWithEmailAndPassword(auth, email, pw);
+    await setDoc(fsDoc(db, 'admin_utenti', cred.user.uid), {
+      email:     email,
+      ruolo:     'superadmin',
+      creatoIl:  new Date().toISOString()
+    });
+    toast('Account creato. Benvenuto!', 'ok');
+  } catch(e) {
+    const msg = e.code === 'auth/email-already-in-use' ? 'Email già registrata.' : e.message;
+    errEl.textContent = msg; errEl.classList.add('on');
+  }
+  spin.style.display = 'none'; txt.textContent = 'Crea account';
+};
 
 // ── Logout ──
 window.doLogout = async function() {
