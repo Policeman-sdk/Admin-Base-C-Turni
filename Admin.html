@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>C-Turni Admin</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#f4f6f8;--card:#ffffff;--border:#e2e8f0;--txt:#1a202c;--txt2:#718096;--txt3:#a0aec0;
+  --blue:#2b6cb0;--red:#e53e3e;--green:#38a169;--orange:#dd6b20;--gold:#b7791f;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06);
+  --shadow-lg:0 4px 24px rgba(0,0,0,.12);--radius:12px;--radius-sm:8px
+}
+body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh}
+/* ── TOP BAR ── */
+.topbar{position:fixed;top:0;left:0;right:0;height:56px;background:var(--card);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 16px;gap:12px;z-index:1000;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.topbar-title{font-size:17px;font-weight:800;color:var(--txt);letter-spacing:-.3px;flex:1}
+.topbar-sub{font-size:11px;color:var(--txt2);font-weight:500}
+.topbar-ava{width:34px;height:34px;border-radius:50%;background:#2b6cb0;color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0}
+/* ── BOTTOM NAV ── */
+#bnav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);
+  display:flex;z-index:1000;box-shadow:0 -1px 8px rgba(0,0,0,.06)}
+.bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:8px 0 calc(8px + env(safe-area-inset-bottom,0px));gap:3px;cursor:pointer;
+  border:none;background:none;color:var(--txt3);font-size:10px;font-weight:600;transition:color .2s}
+.bn.on{color:var(--blue)}.bn-ico{font-size:22px;line-height:1}
+/* ── PAGES ── */
+.pg{display:none;padding:72px 16px 80px;min-height:100vh}
+.pg.on{display:block}
+/* ── LOGIN ── */
+#pg-login{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:var(--bg)}
+.login-box{background:var(--card);border-radius:var(--radius);padding:32px 24px;width:100%;max-width:380px;box-shadow:var(--shadow-lg)}
+.login-logo{text-align:center;margin-bottom:24px}
+.login-logo .ico{font-size:48px;margin-bottom:8px}
+.login-logo h1{font-size:22px;font-weight:800;color:var(--txt)}
+.login-logo p{font-size:13px;color:var(--txt2);margin-top:4px}
+/* ── CARDS ── */
+.card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:12px}
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);text-align:center}
+.stat-n{font-size:32px;font-weight:800;color:var(--blue);line-height:1}
+.stat-l{font-size:12px;color:var(--txt2);margin-top:4px;font-weight:600}
+/* ── FORM ── */
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:11px;font-weight:700;color:var(--txt2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.6px}
+.fc{width:100%;padding:12px 14px;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  color:var(--txt);font-size:15px;outline:none;appearance:none;transition:border-color .2s}
+.fc:focus{border-color:var(--blue)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 20px;border-radius:var(--radius-sm);
+  border:none;font-size:14px;font-weight:700;cursor:pointer;transition:opacity .15s,transform .1s;appearance:none}
+.btn:active{transform:scale(.97)}.btn-p{background:var(--blue);color:#fff}
+.btn-d{background:rgba(229,62,62,.1);color:var(--red);border:1px solid rgba(229,62,62,.2)}
+.btn-g{background:var(--bg);color:var(--txt);border:1px solid var(--border)}
+.btn-full{width:100%}
+/* ── USER CARDS ── */
+.user-card{background:var(--card);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);
+  margin-bottom:10px;position:relative}
+.user-card-top{display:flex;align-items:flex-start;gap:12px}
+.user-ava{width:44px;height:44px;border-radius:50%;background:var(--blue);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0}
+.user-name{font-size:15px;font-weight:700;color:var(--txt)}
+.user-meta{font-size:12px;color:var(--txt2);margin-top:2px}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:4px}
+.badge-ok{background:rgba(56,161,105,.12);color:var(--green)}
+.badge-wait{background:rgba(221,107,32,.12);color:var(--orange)}
+.badge-rej{background:rgba(229,62,62,.12);color:var(--red)}
+.badge-admin{background:rgba(43,108,176,.12);color:var(--blue)}
+.menu-btn{position:absolute;top:12px;right:12px;background:none;border:none;font-size:20px;
+  color:var(--txt3);cursor:pointer;padding:4px 8px;border-radius:6px;line-height:1}
+.menu-btn:hover{background:var(--bg)}
+/* ── DROPDOWN ── */
+.dropdown{position:absolute;top:40px;right:12px;background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius-sm);box-shadow:var(--shadow-lg);z-index:500;min-width:180px;overflow:hidden}
+.dropdown-item{display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:13px;
+  font-weight:600;cursor:pointer;color:var(--txt);transition:background .15s}
+.dropdown-item:hover{background:var(--bg)}
+.dropdown-item.danger{color:var(--red)}
+/* ── ACCORDION REPARTI ── */
+.acc-item{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:10px;overflow:hidden}
+.acc-head{display:flex;align-items:center;justify-content:space-between;padding:16px;cursor:pointer;user-select:none}
+.acc-title{font-size:15px;font-weight:700;color:var(--txt)}
+.acc-sub{font-size:12px;color:var(--txt2);margin-top:2px}
+.acc-chev{font-size:18px;color:var(--txt3);transition:transform .25s}
+.acc-item.open .acc-chev{transform:rotate(180deg)}
+.acc-body{display:none;padding:0 16px 16px;border-top:1px solid var(--border)}
+.acc-item.open .acc-body{display:block}
+.acc-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;
+  border-bottom:1px solid var(--border);font-size:13px}
+.acc-row:last-child{border-bottom:none}
+/* ── SEARCH ── */
+.search-wrap{position:sticky;top:56px;z-index:100;background:var(--bg);padding:10px 0 8px}
+.search-inp{width:100%;padding:10px 14px 10px 38px;background:var(--card);border:1.5px solid var(--border);
+  border-radius:20px;font-size:14px;color:var(--txt);outline:none;appearance:none}
+.search-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--txt3)}
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:2000;align-items:flex-end;justify-content:center}
+.modal-overlay.on{display:flex}
+.modal-box{background:var(--card);border-radius:var(--radius) var(--radius) 0 0;width:100%;max-width:480px;
+  padding:24px;max-height:85vh;overflow-y:auto;animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-title{font-size:17px;font-weight:800;margin-bottom:16px;color:var(--txt)}
+/* ── TOAST ── */
+#toast-wrap{position:fixed;top:64px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast-item{background:var(--txt);color:#fff;padding:10px 16px;border-radius:var(--radius-sm);
+  font-size:13px;font-weight:600;box-shadow:var(--shadow-lg);animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+/* ── MISC ── */
+.sec-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--txt2);margin-bottom:12px}
+.empty{text-align:center;padding:40px 20px;color:var(--txt2);font-size:13px}
+.spinner{display:inline-block;width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--blue);
+  border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err-msg{color:var(--red);font-size:13px;margin-top:8px;display:none}
+.err-msg.on{display:block}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="pg-login">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="ico">🛡️</div>
+      <h1>C-Turni Admin</h1>
+      <p>Pannello di controllo riservato</p>
+    </div>
+    <div class="fg"><label>Email</label><input class="fc" type="email" id="l-email" placeholder="admin@email.com" autocomplete="email"></div>
+    <div class="fg"><label>Password</label><input class="fc" type="password" id="l-pw" placeholder="••••••••" autocomplete="current-password"></div>
+    <div class="err-msg" id="l-err">Accesso negato. Verifica le credenziali.</div>
+    <button class="btn btn-p btn-full" style="margin-top:8px" onclick="doLogin()">
+      <span id="l-spinner" style="display:none" class="spinner"></span>
+      <span id="l-txt">Accedi</span>
+    </button>
+  </div>
+</div>
+
+<!-- ══ APP (nascosta finché non loggato) ══ -->
+<div id="app" style="display:none">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">C-Turni Admin</div>
+      <div class="topbar-sub" id="tb-email"></div>
+    </div>
+    <button class="btn btn-d" style="padding:6px 12px;font-size:12px" onclick="doLogout()">Esci</button>
+  </div>
+
+  <!-- PAGES -->
+  <div class="pg on" id="pg-dash">
+    <div class="sec-title">Panoramica</div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-n" id="st-utenti">–</div><div class="stat-l">Utenti totali</div></div>
+      <div class="stat-card"><div class="stat-n" id="st-reparti">–</div><div class="stat-l">Reparti attivi</div></div>
+      <div class="stat-card"><div class="stat-n" id="st-attesa">–</div><div class="stat-l">In attesa</div></div>
+      <div class="stat-card"><div class="stat-n" id="st-turni">–</div><div class="stat-l">Turni totali</div></div>
+    </div>
+    <div class="sec-title">Attività recente</div>
+    <div id="dash-activity"><div class="empty">Caricamento...</div></div>
+  </div>
+
+  <div class="pg" id="pg-utenti">
+    <div class="search-wrap" style="position:relative">
+      <span class="search-ico">🔍</span>
+      <input class="search-inp" id="u-search" placeholder="Cerca per nome, email, reparto..." oninput="filterUtenti()">
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap" id="u-filters">
+      <button class="btn btn-g" style="padding:6px 12px;font-size:12px" onclick="setUFilter('')">Tutti</button>
+      <button class="btn btn-g" style="padding:6px 12px;font-size:12px" onclick="setUFilter('approved')">✅ Approvati</button>
+      <button class="btn btn-g" style="padding:6px 12px;font-size:12px" onclick="setUFilter('pending')">⏳ In attesa</button>
+      <button class="btn btn-g" style="padding:6px 12px;font-size:12px" onclick="setUFilter('rejected')">❌ Rifiutati</button>
+    </div>
+    <div id="utenti-list"><div class="empty">Caricamento...</div></div>
+  </div>
+
+  <div class="pg" id="pg-reparti">
+    <div class="sec-title">Reparti registrati</div>
+    <div id="reparti-list"><div class="empty">Caricamento...</div></div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div id="bnav">
+    <button class="bn on" id="bn-dash" onclick="goPage('dash')">
+      <div class="bn-ico">🏠</div><span>Dashboard</span>
+    </button>
+    <button class="bn" id="bn-utenti" onclick="goPage('utenti')">
+      <div class="bn-ico">👥</div><span>Utenti</span>
+    </button>
+    <button class="bn" id="bn-reparti" onclick="goPage('reparti')">
+      <div class="bn-ico">🏛️</div><span>Reparti</span>
+    </button>
+  </div>
+</div>
+
+<!-- MODAL MODIFICA UTENTE -->
+<div class="modal-overlay" id="m-edit">
+  <div class="modal-box">
+    <div class="modal-title">✏️ Modifica utente</div>
+    <input type="hidden" id="edit-uid">
+    <div class="fg"><label>Nome</label><input class="fc" id="edit-nome" type="text"></div>
+    <div class="fg"><label>Cognome</label><input class="fc" id="edit-cognome" type="text"></div>
+    <div class="fg"><label>Grado</label><input class="fc" id="edit-grado" type="text"></div>
+    <div class="fg"><label>Ruolo</label>
+      <select class="fc" id="edit-ruolo">
+        <option value="addetto">Addetto</option>
+        <option value="vice">Vice Comandante</option>
+        <option value="comandante">Comandante</option>
+        <option value="superadmin">Superadmin</option>
+      </select>
+    </div>
+    <div class="fg"><label>Stato</label>
+      <select class="fc" id="edit-stato">
+        <option value="approved">Approvato</option>
+        <option value="pending">In attesa</option>
+        <option value="rejected">Rifiutato</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btn-g btn-full" onclick="closeModal('m-edit')">Annulla</button>
+      <button class="btn btn-p btn-full" onclick="saveEdit()">💾 Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast-wrap"></div>
+
+</body>
+
+<script type="module">
+import { initializeApp }     from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+                              from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
+import { getFirestore, collection, doc, getDoc, getDocs, setDoc, deleteDoc, updateDoc, query, orderBy }
+                              from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+
+const ALLOWED_EMAILS = ['emanuele.dileo28@gmail.com'];
+
+const app  = initializeApp({
+  apiKey:            "AIzaSyCKwzJACHHoWqqsqA9s_fGsajIdVJgZ5n4",
+  authDomain:        "c-turni.firebaseapp.com",
+  projectId:         "c-turni",
+  storageBucket:     "c-turni.firebasestorage.app",
+  messagingSenderId: "1085494457115",
+  appId:             "1:1085494457115:web:bff6e0174afa4d7c3d99be"
+});
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+// ── Stato globale ──
+let _utenti   = [];
+let _reparti  = {};
+let _uFilter  = '';
+let _openDrop = null;
+
+// ── Chiudi dropdown cliccando fuori ──
+document.addEventListener('click', function(e) {
+  if(_openDrop && !_openDrop.contains(e.target)) { _openDrop.remove(); _openDrop = null; }
+});
+
+// ── Auth state ──
+onAuthStateChanged(auth, async function(user) {
+  if(!user) { showLogin(); return; }
+  // Verifica superadmin
+  try {
+    const snap = await getDoc(doc(db, 'utenti', user.uid));
+    const data = snap.exists() ? snap.data() : null;
+    if(!data || data.ruolo !== 'superadmin') {
+      toast('Accesso negato: non sei un superadmin', 'err');
+      await signOut(auth); showLogin(); return;
+    }
+  } catch(e) { toast('Errore verifica ruolo: '+e.message,'err'); await signOut(auth); showLogin(); return; }
+  showApp(user);
+  loadAll();
+});
+
+// ── Login ──
+window.doLogin = async function() {
+  const email = document.getElementById('l-email').value.trim();
+  const pw    = document.getElementById('l-pw').value;
+  const err   = document.getElementById('l-err');
+  const spin  = document.getElementById('l-spinner');
+  const txt   = document.getElementById('l-txt');
+  err.classList.remove('on');
+  if(!ALLOWED_EMAILS.includes(email)) { err.textContent='Email non autorizzata.'; err.classList.add('on'); return; }
+  spin.style.display='inline-block'; txt.textContent='Accesso...';
+  try {
+    await signInWithEmailAndPassword(auth, email, pw);
+  } catch(e) {
+    err.textContent = e.code === 'auth/invalid-credential' ? 'Email o password errati.' : e.message;
+    err.classList.add('on');
+  }
+  spin.style.display='none'; txt.textContent='Accedi';
+};
+
+document.getElementById('l-pw').addEventListener('keydown', function(e){ if(e.key==='Enter') window.doLogin(); });
+
+// ── Logout ──
+window.doLogout = async function() {
+  if(!confirm('Esci dal pannello admin?')) return;
+  await signOut(auth);
+};
+
+// ── UI helpers ──
+function showLogin() {
+  document.getElementById('pg-login').style.display='flex';
+  document.getElementById('app').style.display='none';
+}
+function showApp(user) {
+  document.getElementById('pg-login').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('tb-email').textContent = user.email;
+}
+
+window.goPage = function(pg) {
+  document.querySelectorAll('.pg').forEach(function(p){ p.classList.remove('on'); });
+  document.querySelectorAll('.bn').forEach(function(b){ b.classList.remove('on'); });
+  document.getElementById('pg-'+pg).classList.add('on');
+  document.getElementById('bn-'+pg).classList.add('on');
+};
+
+window.closeModal = function(id) { document.getElementById(id).classList.remove('on'); };
+
+function toast(msg, type) {
+  const w = document.getElementById('toast-wrap');
+  const t = document.createElement('div');
+  t.className = 'toast-item';
+  t.style.background = type==='err' ? '#e53e3e' : type==='ok' ? '#38a169' : '#2b6cb0';
+  t.textContent = msg;
+  w.appendChild(t);
+  setTimeout(function(){ t.remove(); }, 3000);
+}
+
+// ── Carica tutti i dati ──
+async function loadAll() {
+  await Promise.all([loadUtenti(), loadReparti()]);
+  renderDash();
+}
+
+// ── Carica utenti da Firestore ──
+async function loadUtenti() {
+  try {
+    const snap = await getDocs(collection(db, 'utenti'));
+    _utenti = [];
+    snap.forEach(function(d){ _utenti.push(Object.assign({_uid: d.id}, d.data())); });
+    renderUtenti();
+  } catch(e) { toast('Errore caricamento utenti: '+e.message,'err'); }
+}
+
+// ── Carica reparti ──
+async function loadReparti() {
+  try {
+    const snap = await getDocs(collection(db, 'reparti'));
+    _reparti = {};
+    for(const repDoc of snap.docs) {
+      const repId = repDoc.id;
+      _reparti[repId] = { id: repId, ...repDoc.data(), utenti: [], turniCount: 0 };
+      // Carica utenti del reparto
+      try {
+        const uSnap = await getDocs(collection(db, 'reparti', repId, 'utenti'));
+        uSnap.forEach(function(d){ _reparti[repId].utenti.push(d.data()); });
+      } catch(e) {}
+      // Conta turni
+      try {
+        const tSnap = await getDocs(collection(db, 'reparti', repId, 'turni'));
+        _reparti[repId].turniCount = tSnap.size;
+      } catch(e) {}
+    }
+    renderReparti();
+  } catch(e) { toast('Errore caricamento reparti: '+e.message,'err'); }
+}
+
+// ── Dashboard ──
+function renderDash() {
+  const totUtenti  = _utenti.length;
+  const totReparti = Object.keys(_reparti).length;
+  const inAttesa   = _utenti.filter(function(u){ return u.stato==='pending'; }).length;
+  const totTurni   = Object.values(_reparti).reduce(function(s,r){ return s+r.turniCount; }, 0);
+  document.getElementById('st-utenti').textContent  = totUtenti;
+  document.getElementById('st-reparti').textContent = totReparti;
+  document.getElementById('st-attesa').textContent  = inAttesa;
+  document.getElementById('st-turni').textContent   = totTurni;
+
+  // Attività recente: ultimi utenti registrati
+  const recenti = _utenti.slice().sort(function(a,b){
+    return (b.creatoIl||'') > (a.creatoIl||'') ? 1 : -1;
+  }).slice(0,5);
+  const el = document.getElementById('dash-activity');
+  if(!recenti.length){ el.innerHTML='<div class="empty">Nessuna attività</div>'; return; }
+  el.innerHTML = recenti.map(function(u){
+    const badge = badgeStato(u.stato);
+    return `<div class="card" style="display:flex;align-items:center;gap:12px;padding:12px 14px">
+      <div class="user-ava" style="width:36px;height:36px;font-size:14px">${initials(u)}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:13px">${u.nome||''} ${u.cognome||''}</div>
+        <div style="font-size:11px;color:var(--txt2)">${u.email||''} · ${u.reparto||'–'}</div>
+      </div>
+      ${badge}
+    </div>`;
+  }).join('');
+}
+
+// ── Utenti ──
+function initials(u) {
+  return ((u.nome||'?')[0]+(u.cognome||'?')[0]).toUpperCase();
+}
+function badgeStato(stato) {
+  const map = { approved:'badge-ok', pending:'badge-wait', rejected:'badge-rej' };
+  const lbl = { approved:'✅ Approvato', pending:'⏳ In attesa', rejected:'❌ Rifiutato' };
+  return `<span class="badge ${map[stato]||'badge-wait'}">${lbl[stato]||stato}</span>`;
+}
+
+window.setUFilter = function(f) {
+  _uFilter = f;
+  document.querySelectorAll('#u-filters .btn').forEach(function(b){ b.classList.remove('btn-p'); b.classList.add('btn-g'); });
+  const idx = ['','approved','pending','rejected'].indexOf(f);
+  const btns = document.querySelectorAll('#u-filters .btn');
+  if(btns[idx]) { btns[idx].classList.remove('btn-g'); btns[idx].classList.add('btn-p'); }
+  renderUtenti();
+};
+
+window.filterUtenti = function() { renderUtenti(); };
+
+function renderUtenti() {
+  const q = (document.getElementById('u-search').value||'').toLowerCase();
+  let list = _utenti.filter(function(u){
+    if(_uFilter && u.stato !== _uFilter) return false;
+    if(q) {
+      const hay = ((u.nome||'')+' '+(u.cognome||'')+' '+(u.email||'')+' '+(u.reparto||'')).toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  const el = document.getElementById('utenti-list');
+  if(!list.length){ el.innerHTML='<div class="empty">Nessun utente trovato</div>'; return; }
+  el.innerHTML = list.map(function(u){
+    const ruoloBadge = u.ruolo==='superadmin'
+      ? '<span class="badge badge-admin">🛡️ Superadmin</span>'
+      : u.ruolo==='comandante' ? '<span class="badge badge-admin">👑 Comandante</span>'
+      : u.ruolo==='vice' ? '<span class="badge" style="background:rgba(183,121,31,.12);color:var(--gold)">⭐ Vice</span>' : '';
+    return `<div class="user-card" id="uc-${u._uid}">
+      <div class="user-card-top">
+        <div class="user-ava">${initials(u)}</div>
+        <div style="flex:1;min-width:0">
+          <div class="user-name">${u.grado||''} ${u.nome||''} ${u.cognome||''}</div>
+          <div class="user-meta">${u.email||'–'}</div>
+          <div class="user-meta">🏛️ ${u.reparto||'Nessun reparto'}</div>
+          <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
+            ${badgeStato(u.stato)} ${ruoloBadge}
+          </div>
+        </div>
+        <button class="menu-btn" onclick="openDrop(event,'${u._uid}')">⋮</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.openDrop = function(e, uid) {
+  e.stopPropagation();
+  if(_openDrop){ _openDrop.remove(); _openDrop=null; }
+  const card = document.getElementById('uc-'+uid);
+  const drop = document.createElement('div');
+  drop.className = 'dropdown';
+  drop.innerHTML = `
+    <div class="dropdown-item" onclick="openEdit('${uid}')">✏️ Modifica</div>
+    <div class="dropdown-item" onclick="scollegaReparto('${uid}')">🔗 Scollega da reparto</div>
+    <div class="dropdown-item danger" onclick="eliminaUtente('${uid}')">🗑️ Elimina account</div>`;
+  card.style.position='relative';
+  card.appendChild(drop);
+  _openDrop = drop;
+};
+
+window.openEdit = function(uid) {
+  if(_openDrop){ _openDrop.remove(); _openDrop=null; }
+  const u = _utenti.find(function(x){ return x._uid===uid; });
+  if(!u) return;
+  document.getElementById('edit-uid').value    = uid;
+  document.getElementById('edit-nome').value   = u.nome||'';
+  document.getElementById('edit-cognome').value= u.cognome||'';
+  document.getElementById('edit-grado').value  = u.grado||'';
+  document.getElementById('edit-ruolo').value  = u.ruolo||'addetto';
+  document.getElementById('edit-stato').value  = u.stato||'pending';
+  document.getElementById('m-edit').classList.add('on');
+};
+
+window.saveEdit = async function() {
+  const uid = document.getElementById('edit-uid').value;
+  const data = {
+    nome:    document.getElementById('edit-nome').value.trim(),
+    cognome: document.getElementById('edit-cognome').value.trim(),
+    grado:   document.getElementById('edit-grado').value.trim(),
+    ruolo:   document.getElementById('edit-ruolo').value,
+    stato:   document.getElementById('edit-stato').value
+  };
+  try {
+    await updateDoc(doc(db,'utenti',uid), data);
+    // Aggiorna anche nel reparto se esiste
+    const u = _utenti.find(function(x){ return x._uid===uid; });
+    if(u && u.reparto) {
+      const repId = u.reparto.toLowerCase().replace(/\s+/g,'_');
+      try { await updateDoc(doc(db,'reparti',repId,'utenti',uid), data); } catch(e){}
+    }
+    const idx = _utenti.findIndex(function(x){ return x._uid===uid; });
+    if(idx>=0) _utenti[idx] = Object.assign(_utenti[idx], data);
+    renderUtenti(); renderDash();
+    closeModal('m-edit');
+    toast('Utente aggiornato','ok');
+  } catch(e){ toast('Errore: '+e.message,'err'); }
+};
+
+window.scollegaReparto = async function(uid) {
+  if(_openDrop){ _openDrop.remove(); _openDrop=null; }
+  const u = _utenti.find(function(x){ return x._uid===uid; });
+  if(!u || !u.reparto){ toast('Utente non ha un reparto','err'); return; }
+  if(!confirm(`Scollega ${u.nome} ${u.cognome} dal reparto "${u.reparto}"?`)) return;
+  try {
+    await updateDoc(doc(db,'utenti',uid), { reparto:'', ruolo:'addetto', stato:'pending' });
+    const repId = u.reparto.toLowerCase().replace(/\s+/g,'_');
+    try { await deleteDoc(doc(db,'reparti',repId,'utenti',uid)); } catch(e){}
+    const idx = _utenti.findIndex(function(x){ return x._uid===uid; });
+    if(idx>=0) Object.assign(_utenti[idx], { reparto:'', ruolo:'addetto', stato:'pending' });
+    renderUtenti(); renderDash();
+    toast('Utente scollegato dal reparto','ok');
+  } catch(e){ toast('Errore: '+e.message,'err'); }
+};
+
+window.eliminaUtente = async function(uid) {
+  if(_openDrop){ _openDrop.remove(); _openDrop=null; }
+  const u = _utenti.find(function(x){ return x._uid===uid; });
+  if(!u) return;
+  if(!confirm(`⚠️ Eliminare definitivamente ${u.nome} ${u.cognome}?\nQuesta azione è irreversibile.`)) return;
+  try {
+    // Elimina sub-collections
+    const todoSnap = await getDocs(collection(db,'utenti',uid,'todo'));
+    const agSnap   = await getDocs(collection(db,'utenti',uid,'agenda'));
+    const ops = [];
+    todoSnap.forEach(function(d){ ops.push(deleteDoc(doc(db,'utenti',uid,'todo',d.id))); });
+    agSnap.forEach(function(d){   ops.push(deleteDoc(doc(db,'utenti',uid,'agenda',d.id))); });
+    await Promise.all(ops);
+    // Elimina dal reparto
+    if(u.reparto) {
+      const repId = u.reparto.toLowerCase().replace(/\s+/g,'_');
+      try { await deleteDoc(doc(db,'reparti',repId,'utenti',uid)); } catch(e){}
+    }
+    // Elimina documento principale
+    await deleteDoc(doc(db,'utenti',uid));
+    _utenti = _utenti.filter(function(x){ return x._uid!==uid; });
+    renderUtenti(); renderDash();
+    toast('Utente eliminato','ok');
+  } catch(e){ toast('Errore: '+e.message,'err'); }
+};
+
+// ── Reparti ──
+function renderReparti() {
+  const el = document.getElementById('reparti-list');
+  const keys = Object.keys(_reparti);
+  if(!keys.length){ el.innerHTML='<div class="empty">Nessun reparto trovato</div>'; return; }
+  el.innerHTML = keys.map(function(repId){
+    const r = _reparti[repId];
+    const comandante = r.utenti.find(function(u){ return u.ruolo==='comandante'; });
+    const nomeRep = repId.replace(/_/g,' ').replace(/\b\w/g,function(c){ return c.toUpperCase(); });
+    return `<div class="acc-item" id="acc-${repId}">
+      <div class="acc-head" onclick="toggleAcc('${repId}')">
+        <div>
+          <div class="acc-title">🏛️ ${nomeRep}</div>
+          <div class="acc-sub">${r.utenti.length} militari · ${r.turniCount} turni</div>
+        </div>
+        <span class="acc-chev">▼</span>
+      </div>
+      <div class="acc-body">
+        <div class="acc-row"><span style="color:var(--txt2)">Comandante</span>
+          <strong>${comandante ? (comandante.grado||'')+ ' '+(comandante.nome||'')+' '+(comandante.cognome||'') : '–'}</strong></div>
+        <div class="acc-row"><span style="color:var(--txt2)">Militari iscritti</span><strong>${r.utenti.length}</strong></div>
+        <div class="acc-row"><span style="color:var(--txt2)">Turni registrati</span><strong>${r.turniCount}</strong></div>
+        <div class="acc-row"><span style="color:var(--txt2)">ID reparto</span><code style="font-size:11px;color:var(--txt3)">${repId}</code></div>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-d" style="font-size:12px;padding:8px 14px" onclick="resettaComando('${repId}')">🔄 Resetta Comando</button>
+          <button class="btn btn-g" style="font-size:12px;padding:8px 14px" onclick="vediUtentiReparto('${repId}')">👥 Vedi utenti</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.toggleAcc = function(repId) {
+  const el = document.getElementById('acc-'+repId);
+  if(el) el.classList.toggle('open');
+};
+
+window.resettaComando = async function(repId) {
+  const r = _reparti[repId];
+  const nomeRep = repId.replace(/_/g,' ');
+  if(!confirm(`Resettare il comando di "${nomeRep}"?\nTutti i ruoli speciali diventeranno "addetto".`)) return;
+  try {
+    const ops = r.utenti.map(async function(u){
+      if(u.ruolo==='comandante'||u.ruolo==='vice'){
+        const uid = u.uid||u._uid;
+        if(!uid) return;
+        await updateDoc(doc(db,'reparti',repId,'utenti',uid), { ruolo:'addetto' });
+        try { await updateDoc(doc(db,'utenti',uid), { ruolo:'addetto' }); } catch(e){}
+        const idx = _utenti.findIndex(function(x){ return x._uid===uid; });
+        if(idx>=0) _utenti[idx].ruolo='addetto';
+        u.ruolo='addetto';
+      }
+    });
+    await Promise.all(ops);
+    renderReparti(); renderUtenti(); renderDash();
+    toast('Comando resettato','ok');
+  } catch(e){ toast('Errore: '+e.message,'err'); }
+};
+
+window.vediUtentiReparto = function(repId) {
+  setUFilter('');
+  const nomeRep = repId.replace(/_/g,' ');
+  document.getElementById('u-search').value = nomeRep;
+  goPage('utenti');
+  filterUtenti();
+};
+
+// ── Esponi globali ──
+window._db = db;
+</script>
+</html>
