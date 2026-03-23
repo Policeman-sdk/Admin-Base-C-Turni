@@ -295,16 +295,26 @@ document.addEventListener('click', function(e) {
 // ── Auth state ──
 onAuthStateChanged(auth, async function(user) {
   if(!user) { showLogin(); return; }
-  // Verifica superadmin
-  try {
-    const snap = await getDoc(doc(db, 'utenti', user.uid));
-    const snap2 = await getDoc(doc(db, 'admin_utenti', user.uid));
-    const data = (snap.exists() ? snap.data() : null) || (snap2.exists() ? snap2.data() : null);
-    if(!data || data.ruolo !== 'superadmin') {
-      toast('Accesso negato: non sei un superadmin', 'err');
-      await signOut(auth); showLogin(); return;
+  // Verifica superadmin — riprova fino a 3 volte per gestire la race condition post-registrazione
+  let data = null;
+  for(let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const snap  = await getDoc(doc(db, 'utenti', user.uid));
+      if(snap.exists()) { data = snap.data(); break; }
+      // Documento non ancora scritto — aspetta e riprova
+      if(attempt < 2) await new Promise(function(r){ setTimeout(r, 1200); });
+    } catch(e) {
+      if(attempt === 2) {
+        toast('Errore verifica ruolo: ' + e.message, 'err');
+        await signOut(auth); showLogin(); return;
+      }
+      await new Promise(function(r){ setTimeout(r, 1200); });
     }
-  } catch(e) { toast('Errore verifica ruolo: '+e.message,'err'); await signOut(auth); showLogin(); return; }
+  }
+  if(!data || data.ruolo !== 'superadmin') {
+    toast('Accesso negato: ruolo superadmin richiesto', 'err');
+    await signOut(auth); showLogin(); return;
+  }
   showApp(user);
   loadAll();
 });
@@ -382,12 +392,16 @@ window.doRegister = async function() {
     const { createUserWithEmailAndPassword } = await import("https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js");
     const { setDoc, doc: fsDoc } = await import("https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js");
     const cred = await createUserWithEmailAndPassword(auth, email, pw);
-    await setDoc(fsDoc(db, 'admin_utenti', cred.user.uid), {
+    // Salva su utenti/{uid} — stessa collection dell'app principale, già coperta dalle Firestore Rules
+    await setDoc(fsDoc(db, 'utenti', cred.user.uid), {
       email:     email,
       ruolo:     'superadmin',
+      stato:     'approved',
+      nome:      'Admin',
+      cognome:   '',
       creatoIl:  new Date().toISOString()
     });
-    toast('Account creato. Benvenuto!', 'ok');
+    toast('Account creato. Accesso in corso...', 'ok');
   } catch(e) {
     const msg = e.code === 'auth/email-already-in-use' ? 'Email già registrata.' : e.message;
     errEl.textContent = msg; errEl.classList.add('on');
