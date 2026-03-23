@@ -447,7 +447,8 @@ function toast(msg, type) {
 
 // ── Carica tutti i dati ──
 async function loadAll() {
-  await Promise.all([loadUtenti(), loadReparti()]);
+  await loadUtenti();   // prima gli utenti (da cui ricaviamo i reparto IDs)
+  await loadReparti();  // poi i reparti (basati sugli utenti)
   renderDash();
 }
 
@@ -458,30 +459,70 @@ async function loadUtenti() {
     _utenti = [];
     snap.forEach(function(d){ _utenti.push(Object.assign({_uid: d.id}, d.data())); });
     renderUtenti();
-  } catch(e) { toast('Errore caricamento utenti: '+e.message,'err'); }
+  } catch(e) {
+    console.error('loadUtenti:', e);
+    if(e.code === 'permission-denied') {
+      document.getElementById('utenti-list').innerHTML =
+        '<div class="empty" style="color:#e53e3e">⛔ Permessi insufficienti.<br><small>Aggiorna le Firestore Rules (vedi istruzioni).</small></div>';
+      _showRulesHint();
+    } else {
+      toast('Errore utenti: '+e.message,'err');
+    }
+  }
 }
 
 // ── Carica reparti ──
 async function loadReparti() {
   try {
-    const snap = await getDocs(collection(db, 'reparti'));
     _reparti = {};
-    for(const repDoc of snap.docs) {
-      const repId = repDoc.id;
-      _reparti[repId] = { id: repId, ...repDoc.data(), utenti: [], turniCount: 0 };
-      // Carica utenti del reparto
+
+    // I reparti non hanno documento radice — li ricaviamo dagli utenti
+    // e poi carichiamo le sub-collections per ognuno
+    const repartiIds = [...new Set(
+      _utenti
+        .map(function(u){ return u.reparto; })
+        .filter(function(r){ return r && !r.startsWith('privato_'); })
+    )];
+
+    for(const repId of repartiIds) {
+      _reparti[repId] = { id: repId, utenti: [], turniCount: 0 };
+      // Utenti del reparto
       try {
         const uSnap = await getDocs(collection(db, 'reparti', repId, 'utenti'));
-        uSnap.forEach(function(d){ _reparti[repId].utenti.push(d.data()); });
-      } catch(e) {}
+        uSnap.forEach(function(d){ _reparti[repId].utenti.push(Object.assign({_uid: d.id}, d.data())); });
+      } catch(e) { console.warn('utenti reparto', repId, e.message); }
       // Conta turni
       try {
         const tSnap = await getDocs(collection(db, 'reparti', repId, 'turni'));
         _reparti[repId].turniCount = tSnap.size;
-      } catch(e) {}
+      } catch(e) { console.warn('turni reparto', repId, e.message); }
     }
+
     renderReparti();
-  } catch(e) { toast('Errore caricamento reparti: '+e.message,'err'); }
+  } catch(e) {
+    console.error('loadReparti:', e);
+    toast('Errore reparti: '+e.message,'err');
+  }
+}
+
+function _showRulesHint() {
+  const el = document.getElementById('dash-activity');
+  if(!el) return;
+  el.innerHTML = `<div class="card" style="border-left:3px solid #e53e3e;padding:14px 16px">
+    <div style="font-weight:700;font-size:13px;color:#e53e3e;margin-bottom:8px">⛔ Firestore Rules da aggiornare</div>
+    <div style="font-size:12px;color:var(--txt2);line-height:1.7">
+      Vai su <strong>Firebase Console → Firestore → Rules</strong> e aggiungi questa regola:<br><br>
+      <code style="display:block;background:var(--bg);padding:10px;border-radius:8px;font-size:11px;white-space:pre-wrap">match /utenti/{uid} {
+  allow read, write: if request.auth != null
+    && request.auth.uid == uid;
+}
+// Aggiungi questa per il superadmin:
+match /{document=**} {
+  allow read, write: if request.auth != null
+    && get(/databases/$(database)/documents/utenti/$(request.auth.uid)).data.ruolo == "superadmin";
+}</code>
+    </div>
+  </div>`;
 }
 
 // ── Dashboard ──
