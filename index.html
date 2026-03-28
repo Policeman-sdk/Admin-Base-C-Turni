@@ -7,114 +7,254 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg:#f4f6f8;--card:#ffffff;--border:#e2e8f0;--txt:#1a202c;--txt2:#718096;--txt3:#a0aec0;
-  --blue:#2b6cb0;--red:#e53e3e;--green:#38a169;--orange:#dd6b20;--gold:#b7791f;
-  --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06);
-  --shadow-lg:0 4px 24px rgba(0,0,0,.12);--radius:12px;--radius-sm:8px
+  --md-primary:#1a6b4a;--md-primary-container:#b7f0d4;--md-on-primary:#fff;
+  --md-secondary:#4a6b5a;--md-secondary-container:#cce8d8;
+  --md-surface:#f6faf8;--md-surface-1:#eef5f1;--md-surface-2:#e6f0eb;
+  --md-on-surface:#1a2e24;--md-on-surface-var:#3d5a4a;
+  --md-outline:#8aada0;--md-outline-var:#c2d8ce;
+  --md-error:#ba1a1a;--md-error-container:#ffdad6;
+  --md-warning:#7a4f00;--md-warning-container:#ffddb3;
+  --md-success:#1a6b4a;--md-success-container:#b7f0d4;
+  --md-card:#ffffff;--md-scrim:rgba(0,0,0,.4);
+  --radius-xl:28px;--radius-l:20px;--radius-m:16px;--radius-s:12px;--radius-xs:8px;
+  --shadow-1:0 1px 2px rgba(0,0,0,.06),0 2px 8px rgba(0,0,0,.06);
+  --shadow-2:0 2px 6px rgba(0,0,0,.08),0 6px 20px rgba(0,0,0,.08);
+  --shadow-3:0 4px 12px rgba(0,0,0,.1),0 12px 32px rgba(0,0,0,.1);
+  --nav-w:260px;--topbar-h:64px
 }
-body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh}
-/* ── TOP BAR ── */
-.topbar{position:fixed;top:0;left:0;right:0;height:56px;background:var(--card);border-bottom:1px solid var(--border);
-  display:flex;align-items:center;padding:0 16px;gap:12px;z-index:1000;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.topbar-title{font-size:17px;font-weight:800;color:var(--txt);letter-spacing:-.3px;flex:1}
-.topbar-sub{font-size:11px;color:var(--txt2);font-weight:500}
-.topbar-ava{width:34px;height:34px;border-radius:50%;background:#2b6cb0;color:#fff;
-  display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0}
-/* ── BOTTOM NAV ── */
-#bnav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);
-  display:flex;z-index:1000;box-shadow:0 -1px 8px rgba(0,0,0,.06)}
+body{background:var(--md-surface);color:var(--md-on-surface);
+  font-family:'Google Sans','Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+
+/* ══ LOGIN ══ */
+#pg-login{display:flex;align-items:center;justify-content:center;min-height:100vh;
+  padding:24px;background:linear-gradient(135deg,#e8f5ee 0%,#f6faf8 60%,#e0f0e8 100%)}
+.login-box{background:var(--md-card);border-radius:var(--radius-xl);padding:40px 32px;
+  width:100%;max-width:400px;box-shadow:var(--shadow-3)}
+.login-logo{text-align:center;margin-bottom:28px}
+.login-logo .ico{font-size:52px;margin-bottom:10px;display:block}
+.login-logo h1{font-size:24px;font-weight:800;color:var(--md-on-surface);letter-spacing:-.5px}
+.login-logo p{font-size:13px;color:var(--md-on-surface-var);margin-top:6px}
+.tab-row{display:flex;background:var(--md-surface-1);border-radius:var(--radius-l);
+  padding:4px;margin-bottom:24px;gap:4px}
+.tab-btn{flex:1;padding:10px;border:none;border-radius:var(--radius-m);font-size:13px;
+  font-weight:700;cursor:pointer;transition:all .2s;color:var(--md-on-surface-var);background:transparent}
+.tab-btn.active{background:var(--md-card);color:var(--md-primary);box-shadow:var(--shadow-1)}
+
+/* ══ FORM FIELDS ══ */
+.fg{margin-bottom:16px}
+.fg label{display:block;font-size:11px;font-weight:700;color:var(--md-on-surface-var);
+  margin-bottom:6px;text-transform:uppercase;letter-spacing:.7px}
+.fc{width:100%;padding:14px 16px;background:var(--md-surface-1);
+  border:1.5px solid var(--md-outline-var);border-radius:var(--radius-m);
+  color:var(--md-on-surface);font-size:15px;outline:none;appearance:none;transition:border-color .2s}
+.fc:focus{border-color:var(--md-primary);background:var(--md-card)}
+.err-msg{color:var(--md-error);font-size:13px;margin-top:8px;display:none}
+.err-msg.on{display:block}
+
+/* ══ BUTTONS ══ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:12px 24px;border-radius:var(--radius-l);border:none;font-size:14px;
+  font-weight:700;cursor:pointer;transition:all .2s;appearance:none;letter-spacing:.2px}
+.btn:active{transform:scale(.97)}
+.btn-p{background:var(--md-primary);color:var(--md-on-primary);box-shadow:var(--shadow-1)}
+.btn-p:hover{box-shadow:var(--shadow-2);filter:brightness(1.05)}
+.btn-d{background:var(--md-error-container);color:var(--md-error)}
+.btn-d:hover{filter:brightness(.95)}
+.btn-g{background:var(--md-surface-2);color:var(--md-on-surface);border:1px solid var(--md-outline-var)}
+.btn-g:hover{background:var(--md-surface-1)}
+.btn-warn{background:var(--md-warning-container);color:var(--md-warning)}
+.btn-full{width:100%}
+.btn-sm{padding:8px 16px;font-size:12px;border-radius:var(--radius-s)}
+.btn-icon{padding:8px;border-radius:50%;min-width:36px;height:36px}
+
+/* ══ APP LAYOUT ══ */
+#app{display:none}
+.topbar{position:fixed;top:0;left:0;right:0;height:var(--topbar-h);
+  background:var(--md-card);border-bottom:1px solid var(--md-outline-var);
+  display:flex;align-items:center;padding:0 20px;gap:14px;z-index:900;box-shadow:var(--shadow-1)}
+.topbar-title{font-size:18px;font-weight:800;color:var(--md-on-surface);letter-spacing:-.4px;flex:1}
+.topbar-sub{font-size:11px;color:var(--md-on-surface-var);font-weight:500}
+.topbar-ava{width:36px;height:36px;border-radius:50%;background:var(--md-primary);
+  color:#fff;display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0;overflow:hidden}
+.topbar-ava img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+
+/* ══ NAV RAIL (desktop) ══ */
+#nav-rail{position:fixed;top:var(--topbar-h);left:0;bottom:0;width:var(--nav-w);
+  background:var(--md-card);border-right:1px solid var(--md-outline-var);
+  padding:16px 12px;z-index:800;display:flex;flex-direction:column;gap:4px;
+  box-shadow:var(--shadow-1)}
+.nr-item{display:flex;align-items:center;gap:14px;padding:14px 16px;
+  border-radius:var(--radius-l);cursor:pointer;transition:all .2s;
+  color:var(--md-on-surface-var);font-size:14px;font-weight:600;border:none;
+  background:transparent;width:100%;text-align:left}
+.nr-item:hover{background:var(--md-surface-1)}
+.nr-item.on{background:var(--md-primary-container);color:var(--md-primary)}
+.nr-item .nr-ico{font-size:20px;flex-shrink:0}
+.nr-badge{margin-left:auto;background:var(--md-error);color:#fff;
+  font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;min-width:20px;text-align:center}
+
+/* ══ BOTTOM NAV (mobile) ══ */
+#bnav{position:fixed;bottom:0;left:0;right:0;background:var(--md-card);
+  border-top:1px solid var(--md-outline-var);display:none;z-index:900;
+  box-shadow:0 -2px 8px rgba(0,0,0,.06)}
 .bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
   padding:8px 0 calc(8px + env(safe-area-inset-bottom,0px));gap:3px;cursor:pointer;
-  border:none;background:none;color:var(--txt3);font-size:10px;font-weight:600;transition:color .2s}
-.bn.on{color:var(--blue)}.bn-ico{font-size:22px;line-height:1}
-/* ── PAGES ── */
-.pg{display:none;padding:72px 16px 80px;min-height:100vh}
+  border:none;background:none;color:var(--md-on-surface-var);font-size:10px;font-weight:600;transition:color .2s}
+.bn.on{color:var(--md-primary)}.bn-ico{font-size:22px;line-height:1}
+
+/* ══ PAGES ══ */
+.pg{display:none;padding:calc(var(--topbar-h) + 24px) 28px 40px calc(var(--nav-w) + 28px);min-height:100vh}
 .pg.on{display:block}
-/* ── LOGIN ── */
-#pg-login{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:var(--bg)}
-.login-box{background:var(--card);border-radius:var(--radius);padding:32px 24px;width:100%;max-width:380px;box-shadow:var(--shadow-lg)}
-.login-logo{text-align:center;margin-bottom:24px}
-.login-logo .ico{font-size:48px;margin-bottom:8px}
-.login-logo h1{font-size:22px;font-weight:800;color:var(--txt)}
-.login-logo p{font-size:13px;color:var(--txt2);margin-top:4px}
-/* ── CARDS ── */
-.card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:12px}
-.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}
-.stat-card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);text-align:center}
-.stat-n{font-size:32px;font-weight:800;color:var(--blue);line-height:1}
-.stat-l{font-size:12px;color:var(--txt2);margin-top:4px;font-weight:600}
-/* ── FORM ── */
-.fg{margin-bottom:14px}
-.fg label{display:block;font-size:11px;font-weight:700;color:var(--txt2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.6px}
-.fc{width:100%;padding:12px 14px;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);
-  color:var(--txt);font-size:15px;outline:none;appearance:none;transition:border-color .2s}
-.fc:focus{border-color:var(--blue)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 20px;border-radius:var(--radius-sm);
-  border:none;font-size:14px;font-weight:700;cursor:pointer;transition:opacity .15s,transform .1s;appearance:none}
-.btn:active{transform:scale(.97)}.btn-p{background:var(--blue);color:#fff}
-.btn-d{background:rgba(229,62,62,.1);color:var(--red);border:1px solid rgba(229,62,62,.2)}
-.btn-g{background:var(--bg);color:var(--txt);border:1px solid var(--border)}
-.btn-full{width:100%}
-/* ── USER CARDS ── */
-.user-card{background:var(--card);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);
-  margin-bottom:10px;position:relative}
-.user-card-top{display:flex;align-items:flex-start;gap:12px}
-.user-ava{width:44px;height:44px;border-radius:50%;background:var(--blue);color:#fff;
-  display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0}
-.user-name{font-size:15px;font-weight:700;color:var(--txt)}
-.user-meta{font-size:12px;color:var(--txt2);margin-top:2px}
-.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:4px}
-.badge-ok{background:rgba(56,161,105,.12);color:var(--green)}
-.badge-wait{background:rgba(221,107,32,.12);color:var(--orange)}
-.badge-rej{background:rgba(229,62,62,.12);color:var(--red)}
-.badge-admin{background:rgba(43,108,176,.12);color:var(--blue)}
-.menu-btn{position:absolute;top:12px;right:12px;background:none;border:none;font-size:20px;
-  color:var(--txt3);cursor:pointer;padding:4px 8px;border-radius:6px;line-height:1}
-.menu-btn:hover{background:var(--bg)}
-/* ── DROPDOWN ── */
-.dropdown{position:absolute;top:40px;right:12px;background:var(--card);border:1px solid var(--border);
-  border-radius:var(--radius-sm);box-shadow:var(--shadow-lg);z-index:500;min-width:180px;overflow:hidden}
-.dropdown-item{display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:13px;
-  font-weight:600;cursor:pointer;color:var(--txt);transition:background .15s}
-.dropdown-item:hover{background:var(--bg)}
-.dropdown-item.danger{color:var(--red)}
-/* ── ACCORDION REPARTI ── */
-.acc-item{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:10px;overflow:hidden}
-.acc-head{display:flex;align-items:center;justify-content:space-between;padding:16px;cursor:pointer;user-select:none}
-.acc-title{font-size:15px;font-weight:700;color:var(--txt)}
-.acc-sub{font-size:12px;color:var(--txt2);margin-top:2px}
-.acc-chev{font-size:18px;color:var(--txt3);transition:transform .25s}
+
+/* ══ CARDS ══ */
+.card{background:var(--md-card);border-radius:var(--radius-xl);padding:20px;
+  box-shadow:var(--shadow-1);margin-bottom:16px}
+.card-title{font-size:13px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.8px;color:var(--md-on-surface-var);margin-bottom:16px}
+
+/* ══ STAT GRID ══ */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat-card{background:var(--md-card);border-radius:var(--radius-xl);padding:20px;
+  box-shadow:var(--shadow-1);text-align:center;transition:box-shadow .2s}
+.stat-card:hover{box-shadow:var(--shadow-2)}
+.stat-n{font-size:36px;font-weight:800;color:var(--md-primary);line-height:1}
+.stat-l{font-size:12px;color:var(--md-on-surface-var);margin-top:6px;font-weight:600}
+
+/* ══ CHIPS / BADGES ══ */
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;
+  padding:4px 12px;border-radius:20px;white-space:nowrap}
+.chip-ok{background:var(--md-success-container);color:var(--md-success)}
+.chip-wait{background:var(--md-warning-container);color:var(--md-warning)}
+.chip-rej{background:var(--md-error-container);color:var(--md-error)}
+.chip-admin{background:var(--md-primary-container);color:var(--md-primary)}
+.chip-sospeso{background:#e8e0f0;color:#6750a4}
+
+/* ══ USER TABLE ══ */
+.u-table{width:100%;border-collapse:collapse}
+.u-table th{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;
+  color:var(--md-on-surface-var);padding:10px 14px;text-align:left;
+  border-bottom:2px solid var(--md-outline-var);background:var(--md-surface-1)}
+.u-table th:first-child{border-radius:var(--radius-s) 0 0 0}
+.u-table th:last-child{border-radius:0 var(--radius-s) 0 0}
+.u-table td{padding:12px 14px;border-bottom:1px solid var(--md-outline-var);
+  font-size:13px;vertical-align:middle}
+.u-table tr:last-child td{border-bottom:none}
+.u-table tr:nth-child(even) td{background:rgba(26,107,74,.03)}
+.u-table tr:hover td{background:var(--md-surface-1)}
+.u-ava{width:36px;height:36px;border-radius:50%;background:var(--md-primary);
+  color:#fff;display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;flex-shrink:0;overflow:hidden}
+.u-ava img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.u-name{font-weight:700;color:var(--md-on-surface);font-size:14px}
+.u-meta{font-size:11px;color:var(--md-on-surface-var);margin-top:2px}
+
+/* ══ BULK BAR ══ */
+.bulk-bar{display:none;align-items:center;gap:12px;padding:12px 16px;
+  background:var(--md-primary-container);border-radius:var(--radius-l);
+  margin-bottom:12px;animation:fadeIn .2s ease}
+.bulk-bar.on{display:flex}
+.bulk-count{font-size:13px;font-weight:700;color:var(--md-primary);flex:1}
+
+/* ══ SEARCH ══ */
+.search-wrap{position:relative;margin-bottom:16px}
+.search-inp{width:100%;padding:12px 16px 12px 44px;background:var(--md-card);
+  border:1.5px solid var(--md-outline-var);border-radius:var(--radius-l);
+  font-size:14px;color:var(--md-on-surface);outline:none;appearance:none;transition:border-color .2s}
+.search-inp:focus{border-color:var(--md-primary)}
+.search-ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--md-outline)}
+
+/* ══ FILTER CHIPS ══ */
+.filter-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.fchip{padding:8px 16px;border-radius:20px;border:1.5px solid var(--md-outline-var);
+  background:var(--md-card);font-size:12px;font-weight:700;cursor:pointer;
+  color:var(--md-on-surface-var);transition:all .2s}
+.fchip.on{background:var(--md-primary-container);color:var(--md-primary);border-color:var(--md-primary)}
+
+/* ══ ACCORDION REPARTI ══ */
+.acc-item{background:var(--md-card);border-radius:var(--radius-xl);
+  box-shadow:var(--shadow-1);margin-bottom:12px;overflow:hidden}
+.acc-head{display:flex;align-items:center;justify-content:space-between;
+  padding:18px 20px;cursor:pointer;user-select:none;transition:background .2s}
+.acc-head:hover{background:var(--md-surface-1)}
+.acc-title{font-size:15px;font-weight:700;color:var(--md-on-surface)}
+.acc-sub{font-size:12px;color:var(--md-on-surface-var);margin-top:3px}
+.acc-chev{font-size:18px;color:var(--md-outline);transition:transform .25s}
 .acc-item.open .acc-chev{transform:rotate(180deg)}
-.acc-body{display:none;padding:0 16px 16px;border-top:1px solid var(--border)}
+.acc-body{display:none;padding:0 20px 20px;border-top:1px solid var(--md-outline-var)}
 .acc-item.open .acc-body{display:block}
-.acc-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;
-  border-bottom:1px solid var(--border);font-size:13px}
+.acc-row{display:flex;justify-content:space-between;align-items:center;
+  padding:10px 0;border-bottom:1px solid var(--md-outline-var);font-size:13px}
 .acc-row:last-child{border-bottom:none}
-/* ── SEARCH ── */
-.search-wrap{position:sticky;top:56px;z-index:100;background:var(--bg);padding:10px 0 8px}
-.search-inp{width:100%;padding:10px 14px 10px 38px;background:var(--card);border:1.5px solid var(--border);
-  border-radius:20px;font-size:14px;color:var(--txt);outline:none;appearance:none}
-.search-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--txt3)}
-/* ── MODAL ── */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:2000;align-items:flex-end;justify-content:center}
+
+/* ══ MODAL ══ */
+.modal-overlay{display:none;position:fixed;inset:0;background:var(--md-scrim);
+  z-index:2000;align-items:flex-end;justify-content:center}
 .modal-overlay.on{display:flex}
-.modal-box{background:var(--card);border-radius:var(--radius) var(--radius) 0 0;width:100%;max-width:480px;
-  padding:24px;max-height:85vh;overflow-y:auto;animation:slideUp .3s ease}
+.modal-box{background:var(--md-card);border-radius:var(--radius-xl) var(--radius-xl) 0 0;
+  width:100%;max-width:520px;padding:28px;max-height:88vh;overflow-y:auto;
+  animation:slideUp .3s cubic-bezier(.34,1.56,.64,1)}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.modal-title{font-size:17px;font-weight:800;margin-bottom:16px;color:var(--txt)}
-/* ── TOAST ── */
-#toast-wrap{position:fixed;top:64px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:8px}
-.toast-item{background:var(--txt);color:#fff;padding:10px 16px;border-radius:var(--radius-sm);
-  font-size:13px;font-weight:600;box-shadow:var(--shadow-lg);animation:fadeIn .3s ease}
-@keyframes fadeIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-/* ── MISC ── */
-.sec-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--txt2);margin-bottom:12px}
-.empty{text-align:center;padding:40px 20px;color:var(--txt2);font-size:13px}
-.spinner{display:inline-block;width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--blue);
-  border-radius:50%;animation:spin .7s linear infinite}
+.modal-title{font-size:18px;font-weight:800;margin-bottom:20px;color:var(--md-on-surface)}
+.modal-handle{width:40px;height:4px;background:var(--md-outline-var);
+  border-radius:2px;margin:0 auto 20px;display:block}
+
+/* ══ CONFIRM DIALOG ══ */
+.confirm-overlay{display:none;position:fixed;inset:0;background:var(--md-scrim);
+  z-index:3000;align-items:center;justify-content:center;padding:24px}
+.confirm-overlay.on{display:flex}
+.confirm-box{background:var(--md-card);border-radius:var(--radius-xl);
+  padding:28px;max-width:380px;width:100%;box-shadow:var(--shadow-3);animation:scaleIn .2s ease}
+@keyframes scaleIn{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+.confirm-title{font-size:17px;font-weight:800;margin-bottom:10px;color:var(--md-on-surface)}
+.confirm-msg{font-size:14px;color:var(--md-on-surface-var);line-height:1.6;margin-bottom:24px}
+.confirm-actions{display:flex;gap:10px;justify-content:flex-end}
+
+/* ══ TOAST ══ */
+#toast-wrap{position:fixed;top:calc(var(--topbar-h) + 12px);right:20px;
+  z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast-item{background:var(--md-on-surface);color:#fff;padding:12px 18px;
+  border-radius:var(--radius-l);font-size:13px;font-weight:600;
+  box-shadow:var(--shadow-3);animation:toastIn .3s cubic-bezier(.34,1.56,.64,1);
+  display:flex;align-items:center;gap:8px;max-width:320px}
+@keyframes toastIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+
+/* ══ MISC ══ */
+.sec-title{font-size:13px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.8px;color:var(--md-on-surface-var);margin-bottom:16px}
+.empty{text-align:center;padding:48px 20px;color:var(--md-on-surface-var);font-size:14px}
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.err-msg{color:var(--red);font-size:13px;margin-top:8px;display:none}
-.err-msg.on{display:block}
+.divider{height:1px;background:var(--md-outline-var);margin:20px 0}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.page-title{font-size:22px;font-weight:800;color:var(--md-on-surface);letter-spacing:-.4px}
+.table-wrap{background:var(--md-card);border-radius:var(--radius-xl);
+  box-shadow:var(--shadow-1);overflow:hidden;overflow-x:auto}
+input[type=checkbox]{width:16px;height:16px;accent-color:var(--md-primary);cursor:pointer}
+
+/* ══ MANUTENZIONE ══ */
+.maint-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.maint-card{background:var(--md-card);border-radius:var(--radius-xl);
+  padding:24px;box-shadow:var(--shadow-1)}
+.maint-card-ico{font-size:36px;margin-bottom:12px}
+.maint-card-title{font-size:16px;font-weight:800;color:var(--md-on-surface);margin-bottom:6px}
+.maint-card-desc{font-size:13px;color:var(--md-on-surface-var);line-height:1.6;margin-bottom:16px}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:768px){
+  #nav-rail{display:none}
+  #bnav{display:flex}
+  .pg{padding:calc(var(--topbar-h) + 16px) 16px calc(80px + env(safe-area-inset-bottom,0px))}
+  .stat-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .stat-n{font-size:28px}
+  .page-header{flex-direction:column;align-items:flex-start}
+  .u-table th:nth-child(4),.u-table td:nth-child(4),
+  .u-table th:nth-child(5),.u-table td:nth-child(5){display:none}
+}
+@media(min-width:769px) and (max-width:1100px){
+  .stat-grid{grid-template-columns:repeat(2,1fr)}
+}
 </style>
 </head>
 <body>
@@ -123,23 +263,14 @@ body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSys
 <div id="pg-login">
   <div class="login-box">
     <div class="login-logo">
-      <div class="ico">🛡️</div>
+      <span class="ico">🛡️</span>
       <h1>C-Turni Admin</h1>
       <p>Pannello di controllo riservato</p>
     </div>
-    <!-- TAB -->
-    <div style="display:flex;background:var(--bg);border-radius:var(--radius-sm);padding:3px;margin-bottom:20px">
-      <button id="tab-login" onclick="switchTab('login')"
-        style="flex:1;padding:8px;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;background:var(--card);color:var(--txt);box-shadow:var(--shadow)">
-        Accedi
-      </button>
-      <button id="tab-reg" onclick="switchTab('reg')"
-        style="flex:1;padding:8px;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;background:transparent;color:var(--txt2)">
-        Registrati
-      </button>
+    <div class="tab-row">
+      <button id="tab-login" class="tab-btn active" onclick="switchTab('login')">Accedi</button>
+      <button id="tab-reg" class="tab-btn" onclick="switchTab('reg')">Registrati</button>
     </div>
-
-    <!-- FORM LOGIN -->
     <div id="form-login">
       <div class="fg"><label>Email</label><input class="fc" type="email" id="l-email" placeholder="admin@email.com" autocomplete="email"></div>
       <div class="fg"><label>Password</label><input class="fc" type="password" id="l-pw" placeholder="••••••••" autocomplete="current-password"></div>
@@ -149,8 +280,6 @@ body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSys
         <span id="l-txt">Accedi</span>
       </button>
     </div>
-
-    <!-- FORM REGISTRAZIONE -->
     <div id="form-reg" style="display:none">
       <div class="fg"><label>Email</label><input class="fc" type="email" id="r-email" placeholder="tuaemail@esempio.com" autocomplete="email"></div>
       <div class="fg"><label>Password</label><input class="fc" type="password" id="r-pw" placeholder="Min. 6 caratteri" autocomplete="new-password"></div>
@@ -161,28 +290,48 @@ body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSys
         <span id="r-spinner" style="display:none" class="spinner"></span>
         <span id="r-txt">Crea account</span>
       </button>
-      <p style="font-size:11px;color:var(--txt3);text-align:center;margin-top:12px">
+      <p style="font-size:11px;color:var(--md-on-surface-var);text-align:center;margin-top:12px">
         Il codice di invito è necessario per creare un account admin.
       </p>
     </div>
   </div>
 </div>
 
-<!-- ══ APP (nascosta finché non loggato) ══ -->
-<div id="app" style="display:none">
+<!-- ══ APP ══ -->
+<div id="app">
 
   <!-- TOP BAR -->
   <div class="topbar">
-    <div>
+    <div style="flex:1;min-width:0">
       <div class="topbar-title">C-Turni Admin</div>
       <div class="topbar-sub" id="tb-email"></div>
     </div>
-    <button class="btn btn-d" style="padding:6px 12px;font-size:12px" onclick="doLogout()">Esci</button>
+    <button class="btn btn-d btn-sm" onclick="doLogout()">Esci</button>
   </div>
 
-  <!-- PAGES -->
+  <!-- NAV RAIL (desktop) -->
+  <nav id="nav-rail">
+    <button class="nr-item on" id="nr-dash" onclick="goPage('dash')">
+      <span class="nr-ico">🏠</span>Dashboard
+    </button>
+    <button class="nr-item" id="nr-utenti" onclick="goPage('utenti')">
+      <span class="nr-ico">👥</span>Utenti
+      <span class="nr-badge" id="nr-badge-attesa" style="display:none">0</span>
+    </button>
+    <button class="nr-item" id="nr-reparti" onclick="goPage('reparti')">
+      <span class="nr-ico">🏛️</span>Reparti
+    </button>
+    <button class="nr-item" id="nr-manutenzione" onclick="goPage('manutenzione')">
+      <span class="nr-ico">🔧</span>Manutenzione
+    </button>
+  </nav>
+
+  <!-- ── DASHBOARD ── -->
   <div class="pg on" id="pg-dash">
-    <div class="sec-title">Panoramica</div>
+    <div class="page-header">
+      <div class="page-title">Dashboard</div>
+      <button class="btn btn-g btn-sm" onclick="loadAll()">🔄 Aggiorna</button>
+    </div>
     <div class="stat-grid">
       <div class="stat-card"><div class="stat-n" id="st-utenti">–</div><div class="stat-l">Utenti totali</div></div>
       <div class="stat-card"><div class="stat-n" id="st-reparti">–</div><div class="stat-l">Reparti attivi</div></div>
@@ -193,26 +342,67 @@ body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSys
     <div id="dash-activity"><div class="empty">Caricamento...</div></div>
   </div>
 
+  <!-- ── UTENTI ── -->
   <div class="pg" id="pg-utenti">
-    <div class="search-wrap" style="position:relative">
+    <div class="page-header">
+      <div class="page-title">Gestione Utenti</div>
+    </div>
+    <div class="search-wrap">
       <span class="search-ico">🔍</span>
       <input class="search-inp" id="u-search" placeholder="Cerca per nome, email, reparto..." oninput="filterUtenti()">
     </div>
-    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap" id="u-filters">
-      <button class="btn btn-g" style="padding:6px 12px;font-size:12px" onclick="setUFilter('')">Tutti</button>
-      <button class="btn btn-g" style="padding:6px 12px;font-size:12px" onclick="setUFilter('approved')">✅ Approvati</button>
-      <button class="btn btn-g" style="padding:6px 12px;font-size:12px" onclick="setUFilter('pending')">⏳ In attesa</button>
-      <button class="btn btn-g" style="padding:6px 12px;font-size:12px" onclick="setUFilter('rejected')">❌ Rifiutati</button>
+    <div class="filter-row" id="u-filters">
+      <button class="fchip on" onclick="setUFilter('')">Tutti</button>
+      <button class="fchip" onclick="setUFilter('approved')">✅ Approvati</button>
+      <button class="fchip" onclick="setUFilter('pending')">⏳ In attesa</button>
+      <button class="fchip" onclick="setUFilter('rejected')">❌ Rifiutati</button>
+      <button class="fchip" onclick="setUFilter('sospeso')">🚫 Sospesi</button>
+    </div>
+    <!-- Bulk bar (appare solo con pending filter) -->
+    <div class="bulk-bar" id="bulk-bar">
+      <span class="bulk-count" id="bulk-count">0 selezionati</span>
+      <button class="btn btn-p btn-sm" onclick="approvaSelezionati()">✅ Approva Selezionati</button>
     </div>
     <div id="utenti-list"><div class="empty">Caricamento...</div></div>
   </div>
 
+  <!-- ── REPARTI ── -->
   <div class="pg" id="pg-reparti">
-    <div class="sec-title">Reparti registrati</div>
+    <div class="page-header">
+      <div class="page-title">Reparti</div>
+    </div>
     <div id="reparti-list"><div class="empty">Caricamento...</div></div>
   </div>
 
-  <!-- BOTTOM NAV -->
+  <!-- ── MANUTENZIONE ── -->
+  <div class="pg" id="pg-manutenzione">
+    <div class="page-header">
+      <div class="page-title">🔧 Manutenzione e Backup</div>
+    </div>
+    <div class="maint-grid">
+      <div class="maint-card">
+        <div class="maint-card-ico">🗑️</div>
+        <div class="maint-card-title">Pulizia Database</div>
+        <div class="maint-card-desc">Elimina tutti i turni antecedenti a 6 mesi fa. Questa operazione libera quota Firestore e non è reversibile.</div>
+        <button class="btn btn-d btn-full" onclick="eliminaTurniVecchi()">Elimina turni &gt; 6 mesi</button>
+        <div id="maint-turni-result" style="margin-top:10px;font-size:13px;color:var(--md-on-surface-var)"></div>
+      </div>
+      <div class="maint-card">
+        <div class="maint-card-ico">📥</div>
+        <div class="maint-card-title">Esporta Utenti</div>
+        <div class="maint-card-desc">Scarica un file CSV con tutti i dati degli utenti registrati: nome, cognome, email, reparto, grado e stato.</div>
+        <button class="btn btn-p btn-full" onclick="esportaUtentiCSV()">📥 Esporta Utenti (CSV)</button>
+      </div>
+      <div class="maint-card">
+        <div class="maint-card-ico">🔄</div>
+        <div class="maint-card-title">Ricarica Dati</div>
+        <div class="maint-card-desc">Forza il ricaricamento di tutti i dati da Firestore (utenti, reparti, turni).</div>
+        <button class="btn btn-g btn-full" onclick="loadAll()">🔄 Ricarica tutto</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV (mobile) -->
   <div id="bnav">
     <button class="bn on" id="bn-dash" onclick="goPage('dash')">
       <div class="bn-ico">🏠</div><span>Dashboard</span>
@@ -223,12 +413,16 @@ body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSys
     <button class="bn" id="bn-reparti" onclick="goPage('reparti')">
       <div class="bn-ico">🏛️</div><span>Reparti</span>
     </button>
+    <button class="bn" id="bn-manutenzione" onclick="goPage('manutenzione')">
+      <div class="bn-ico">🔧</div><span>Manutenzione</span>
+    </button>
   </div>
 </div>
 
 <!-- MODAL MODIFICA UTENTE -->
 <div class="modal-overlay" id="m-edit">
   <div class="modal-box">
+    <span class="modal-handle"></span>
     <div class="modal-title">✏️ Modifica utente</div>
     <input type="hidden" id="edit-uid">
     <div class="fg"><label>Nome</label><input class="fc" id="edit-nome" type="text"></div>
@@ -247,6 +441,7 @@ body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSys
         <option value="approved">Approvato</option>
         <option value="pending">In attesa</option>
         <option value="rejected">Rifiutato</option>
+        <option value="sospeso">Sospeso</option>
       </select>
     </div>
     <div style="display:flex;gap:10px;margin-top:8px">
@@ -256,19 +451,31 @@ body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSys
   </div>
 </div>
 
+<!-- CONFIRM DIALOG -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-title" id="confirm-title">Conferma</div>
+    <div class="confirm-msg" id="confirm-msg"></div>
+    <div class="confirm-actions">
+      <button class="btn btn-g" onclick="confirmResolve(false)">Annulla</button>
+      <button class="btn btn-d" id="confirm-ok-btn" onclick="confirmResolve(true)">Conferma</button>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div id="toast-wrap"></div>
 
-</body>
-
 <script type="module">
 import { initializeApp }     from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged }
                               from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
-import { getFirestore, collection, doc, getDoc, getDocs, setDoc, deleteDoc, updateDoc, query, orderBy }
+import { getFirestore, collection, doc, getDoc, getDocs, setDoc, deleteDoc, updateDoc,
+         query, where, writeBatch, Timestamp }
                               from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
 
 const ALLOWED_EMAILS = ['emanuele.dileo28@gmail.com'];
+const INVITE_CODE    = 'CTAdmin2026';
 
 const app  = initializeApp({
   apiKey:            "AIzaSyCKwzJACHHoWqqsqA9s_fGsajIdVJgZ5n4",
@@ -286,6 +493,24 @@ let _utenti   = [];
 let _reparti  = {};
 let _uFilter  = '';
 let _openDrop = null;
+let _confirmResolve = null;
+
+// ── Confirm dialog ──
+window.confirmResolve = function(val) {
+  document.getElementById('confirm-overlay').classList.remove('on');
+  if(_confirmResolve) { _confirmResolve(val); _confirmResolve = null; }
+};
+function showConfirm(title, msg, okLabel='Conferma', danger=true) {
+  return new Promise(function(resolve) {
+    document.getElementById('confirm-title').textContent = title;
+    document.getElementById('confirm-msg').textContent   = msg;
+    const okBtn = document.getElementById('confirm-ok-btn');
+    okBtn.textContent = okLabel;
+    okBtn.className   = 'btn ' + (danger ? 'btn-d' : 'btn-p');
+    _confirmResolve   = resolve;
+    document.getElementById('confirm-overlay').classList.add('on');
+  });
+}
 
 // ── Chiudi dropdown cliccando fuori ──
 document.addEventListener('click', function(e) {
@@ -295,19 +520,14 @@ document.addEventListener('click', function(e) {
 // ── Auth state ──
 onAuthStateChanged(auth, async function(user) {
   if(!user) { showLogin(); return; }
-  // Verifica superadmin — riprova fino a 3 volte per gestire la race condition post-registrazione
   let data = null;
   for(let attempt = 0; attempt < 3; attempt++) {
     try {
-      const snap  = await getDoc(doc(db, 'utenti', user.uid));
+      const snap = await getDoc(doc(db, 'utenti', user.uid));
       if(snap.exists()) { data = snap.data(); break; }
-      // Documento non ancora scritto — aspetta e riprova
       if(attempt < 2) await new Promise(function(r){ setTimeout(r, 1200); });
     } catch(e) {
-      if(attempt === 2) {
-        toast('Errore verifica ruolo: ' + e.message, 'err');
-        await signOut(auth); showLogin(); return;
-      }
+      if(attempt === 2) { toast('Errore verifica ruolo: ' + e.message, 'err'); await signOut(auth); showLogin(); return; }
       await new Promise(function(r){ setTimeout(r, 1200); });
     }
   }
@@ -345,61 +565,34 @@ window.switchTab = function(tab) {
   const isLogin = tab === 'login';
   document.getElementById('form-login').style.display = isLogin ? 'block' : 'none';
   document.getElementById('form-reg').style.display   = isLogin ? 'none'  : 'block';
-  const tl = document.getElementById('tab-login');
-  const tr = document.getElementById('tab-reg');
-  tl.style.background   = isLogin ? 'var(--card)' : 'transparent';
-  tl.style.color        = isLogin ? 'var(--txt)'  : 'var(--txt2)';
-  tl.style.boxShadow    = isLogin ? 'var(--shadow)' : 'none';
-  tr.style.background   = isLogin ? 'transparent' : 'var(--card)';
-  tr.style.color        = isLogin ? 'var(--txt2)' : 'var(--txt)';
-  tr.style.boxShadow    = isLogin ? 'none' : 'var(--shadow)';
+  document.getElementById('tab-login').className = 'tab-btn' + (isLogin ? ' active' : '');
+  document.getElementById('tab-reg').className   = 'tab-btn' + (!isLogin ? ' active' : '');
   document.getElementById('l-err').classList.remove('on');
   document.getElementById('r-err').classList.remove('on');
 };
 
 // ── Registrazione ──
-const INVITE_CODE = 'CTAdmin2026';   // ← cambia questo codice quando vuoi
-
 window.doRegister = async function() {
-  const email   = document.getElementById('r-email').value.trim();
-  const pw      = document.getElementById('r-pw').value;
-  const pw2     = document.getElementById('r-pw2').value;
-  const code    = document.getElementById('r-code').value;
-  const errEl   = document.getElementById('r-err');
-  const spin    = document.getElementById('r-spinner');
-  const txt     = document.getElementById('r-txt');
+  const email = document.getElementById('r-email').value.trim();
+  const pw    = document.getElementById('r-pw').value;
+  const pw2   = document.getElementById('r-pw2').value;
+  const code  = document.getElementById('r-code').value;
+  const errEl = document.getElementById('r-err');
+  const spin  = document.getElementById('r-spinner');
+  const txt   = document.getElementById('r-txt');
   errEl.classList.remove('on');
-
   if(!ALLOWED_EMAILS.includes(email) && code !== INVITE_CODE) {
-    errEl.textContent = 'Email non autorizzata o codice di invito errato.';
-    errEl.classList.add('on'); return;
+    errEl.textContent = 'Email non autorizzata o codice di invito errato.'; errEl.classList.add('on'); return;
   }
-  if(code !== INVITE_CODE) {
-    errEl.textContent = 'Codice di invito errato.';
-    errEl.classList.add('on'); return;
-  }
-  if(pw.length < 6) {
-    errEl.textContent = 'La password deve essere di almeno 6 caratteri.';
-    errEl.classList.add('on'); return;
-  }
-  if(pw !== pw2) {
-    errEl.textContent = 'Le password non coincidono.';
-    errEl.classList.add('on'); return;
-  }
-
+  if(code !== INVITE_CODE) { errEl.textContent = 'Codice di invito errato.'; errEl.classList.add('on'); return; }
+  if(pw.length < 6) { errEl.textContent = 'La password deve essere di almeno 6 caratteri.'; errEl.classList.add('on'); return; }
+  if(pw !== pw2) { errEl.textContent = 'Le password non coincidono.'; errEl.classList.add('on'); return; }
   spin.style.display = 'inline-block'; txt.textContent = 'Creazione...';
   try {
-    const { createUserWithEmailAndPassword } = await import("https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js");
-    const { setDoc, doc: fsDoc } = await import("https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js");
     const cred = await createUserWithEmailAndPassword(auth, email, pw);
-    // Salva su utenti/{uid} — stessa collection dell'app principale, già coperta dalle Firestore Rules
-    await setDoc(fsDoc(db, 'utenti', cred.user.uid), {
-      email:     email,
-      ruolo:     'superadmin',
-      stato:     'approved',
-      nome:      'Admin',
-      cognome:   '',
-      creatoIl:  new Date().toISOString()
+    await setDoc(doc(db, 'utenti', cred.user.uid), {
+      email: email, ruolo: 'superadmin', stato: 'approved',
+      nome: 'Admin', cognome: '', creatoIl: new Date().toISOString()
     });
     toast('Account creato. Accesso in corso...', 'ok');
   } catch(e) {
@@ -411,7 +604,8 @@ window.doRegister = async function() {
 
 // ── Logout ──
 window.doLogout = async function() {
-  if(!confirm('Esci dal pannello admin?')) return;
+  const ok = await showConfirm('Esci', 'Vuoi uscire dal pannello admin?', 'Esci', false);
+  if(!ok) return;
   await signOut(auth);
 };
 
@@ -428,42 +622,77 @@ function showApp(user) {
 
 window.goPage = function(pg) {
   document.querySelectorAll('.pg').forEach(function(p){ p.classList.remove('on'); });
+  document.querySelectorAll('.nr-item').forEach(function(b){ b.classList.remove('on'); });
   document.querySelectorAll('.bn').forEach(function(b){ b.classList.remove('on'); });
   document.getElementById('pg-'+pg).classList.add('on');
-  document.getElementById('bn-'+pg).classList.add('on');
+  const nr = document.getElementById('nr-'+pg);
+  if(nr) nr.classList.add('on');
+  const bn = document.getElementById('bn-'+pg);
+  if(bn) bn.classList.add('on');
 };
 
 window.closeModal = function(id) { document.getElementById(id).classList.remove('on'); };
 
 function toast(msg, type) {
+  const icons = { ok:'✅', err:'❌', info:'ℹ️' };
+  const colors = { ok:'#1a6b4a', err:'#ba1a1a', info:'#1a5c8a' };
   const w = document.getElementById('toast-wrap');
   const t = document.createElement('div');
   t.className = 'toast-item';
-  t.style.background = type==='err' ? '#e53e3e' : type==='ok' ? '#38a169' : '#2b6cb0';
-  t.textContent = msg;
+  t.style.background = colors[type] || colors.info;
+  t.innerHTML = `<span>${icons[type]||'ℹ️'}</span><span>${msg}</span>`;
   w.appendChild(t);
-  setTimeout(function(){ t.remove(); }, 3000);
+  setTimeout(function(){ t.style.opacity='0'; t.style.transition='opacity .3s'; setTimeout(function(){ t.remove(); }, 300); }, 3000);
+}
+
+// ── Avatar helper ──
+function avatarEl(u, size=36) {
+  const foto = u.foto || u.immagine || u.photoURL || u.fotoURL || '';
+  if(foto) {
+    return `<div class="u-ava" style="width:${size}px;height:${size}px"><img src="${foto}" alt="" onerror="this.parentElement.innerHTML='${initials(u)}'"></div>`;
+  }
+  return `<div class="u-ava" style="width:${size}px;height:${size}px;font-size:${Math.round(size*0.36)}px">${initials(u)}</div>`;
+}
+
+function initials(u) {
+  return ((u.nome||'?')[0]+(u.cognome||'?')[0]).toUpperCase();
+}
+
+function chipStato(stato) {
+  const map = {
+    approved: ['chip-ok',  '✅ Approvato'],
+    pending:  ['chip-wait','⏳ In attesa'],
+    rejected: ['chip-rej', '❌ Rifiutato'],
+    sospeso:  ['chip-sospeso','🚫 Sospeso']
+  };
+  const [cls, lbl] = map[stato] || ['chip-wait', stato];
+  return `<span class="chip ${cls}">${lbl}</span>`;
 }
 
 // ── Carica tutti i dati ──
 async function loadAll() {
-  await loadUtenti();   // prima gli utenti (da cui ricaviamo i reparto IDs)
-  await loadReparti();  // poi i reparti (basati sugli utenti)
+  await loadUtenti();
+  await loadReparti();
   renderDash();
 }
+window.loadAll = loadAll;
 
-// ── Carica utenti da Firestore ──
+// ── Carica utenti ──
 async function loadUtenti() {
   try {
     const snap = await getDocs(collection(db, 'utenti'));
     _utenti = [];
     snap.forEach(function(d){ _utenti.push(Object.assign({_uid: d.id}, d.data())); });
     renderUtenti();
+    // Aggiorna badge attesa
+    const nAttesa = _utenti.filter(function(u){ return u.stato==='pending'; }).length;
+    const badge = document.getElementById('nr-badge-attesa');
+    if(badge) { badge.textContent = nAttesa; badge.style.display = nAttesa > 0 ? 'inline-block' : 'none'; }
   } catch(e) {
     console.error('loadUtenti:', e);
     if(e.code === 'permission-denied') {
       document.getElementById('utenti-list').innerHTML =
-        '<div class="empty" style="color:#e53e3e">⛔ Permessi insufficienti.<br><small>Aggiorna le Firestore Rules (vedi istruzioni).</small></div>';
+        '<div class="empty" style="color:var(--md-error)">⛔ Permessi insufficienti. Aggiorna le Firestore Rules.</div>';
       _showRulesHint();
     } else {
       toast('Errore utenti: '+e.message,'err');
@@ -475,29 +704,20 @@ async function loadUtenti() {
 async function loadReparti() {
   try {
     _reparti = {};
-
-    // I reparti non hanno documento radice — li ricaviamo dagli utenti
-    // e poi carichiamo le sub-collections per ognuno
     const repartiIds = [...new Set(
-      _utenti
-        .map(function(u){ return u.reparto; })
-        .filter(function(r){ return r && !r.startsWith('privato_'); })
+      _utenti.map(function(u){ return u.reparto; }).filter(function(r){ return r && !r.startsWith('privato_'); })
     )];
-
     for(const repId of repartiIds) {
       _reparti[repId] = { id: repId, utenti: [], turniCount: 0 };
-      // Utenti del reparto
       try {
         const uSnap = await getDocs(collection(db, 'reparti', repId, 'utenti'));
         uSnap.forEach(function(d){ _reparti[repId].utenti.push(Object.assign({_uid: d.id}, d.data())); });
       } catch(e) { console.warn('utenti reparto', repId, e.message); }
-      // Conta turni
       try {
         const tSnap = await getDocs(collection(db, 'reparti', repId, 'turni'));
         _reparti[repId].turniCount = tSnap.size;
       } catch(e) { console.warn('turni reparto', repId, e.message); }
     }
-
     renderReparti();
   } catch(e) {
     console.error('loadReparti:', e);
@@ -508,69 +728,45 @@ async function loadReparti() {
 function _showRulesHint() {
   const el = document.getElementById('dash-activity');
   if(!el) return;
-  el.innerHTML = `<div class="card" style="border-left:3px solid #e53e3e;padding:14px 16px">
-    <div style="font-weight:700;font-size:13px;color:#e53e3e;margin-bottom:8px">⛔ Firestore Rules da aggiornare</div>
-    <div style="font-size:12px;color:var(--txt2);line-height:1.7">
-      Vai su <strong>Firebase Console → Firestore → Rules</strong> e aggiungi questa regola:<br><br>
-      <code style="display:block;background:var(--bg);padding:10px;border-radius:8px;font-size:11px;white-space:pre-wrap">match /utenti/{uid} {
-  allow read, write: if request.auth != null
-    && request.auth.uid == uid;
-}
-// Aggiungi questa per il superadmin:
-match /{document=**} {
-  allow read, write: if request.auth != null
-    && get(/databases/$(database)/documents/utenti/$(request.auth.uid)).data.ruolo == "superadmin";
-}</code>
+  el.innerHTML = `<div class="card" style="border-left:4px solid var(--md-error)">
+    <div style="font-weight:700;font-size:13px;color:var(--md-error);margin-bottom:8px">⛔ Firestore Rules da aggiornare</div>
+    <div style="font-size:12px;color:var(--md-on-surface-var);line-height:1.7">
+      Vai su <strong>Firebase Console → Firestore → Rules</strong> e aggiungi la regola superadmin.
     </div>
   </div>`;
 }
 
 // ── Dashboard ──
 function renderDash() {
-  const totUtenti  = _utenti.length;
-  const totReparti = Object.keys(_reparti).length;
-  const inAttesa   = _utenti.filter(function(u){ return u.stato==='pending'; }).length;
-  const totTurni   = Object.values(_reparti).reduce(function(s,r){ return s+r.turniCount; }, 0);
-  document.getElementById('st-utenti').textContent  = totUtenti;
-  document.getElementById('st-reparti').textContent = totReparti;
-  document.getElementById('st-attesa').textContent  = inAttesa;
-  document.getElementById('st-turni').textContent   = totTurni;
+  document.getElementById('st-utenti').textContent  = _utenti.length;
+  document.getElementById('st-reparti').textContent = Object.keys(_reparti).length;
+  document.getElementById('st-attesa').textContent  = _utenti.filter(function(u){ return u.stato==='pending'; }).length;
+  document.getElementById('st-turni').textContent   = Object.values(_reparti).reduce(function(s,r){ return s+r.turniCount; }, 0);
 
-  // Attività recente: ultimi utenti registrati
   const recenti = _utenti.slice().sort(function(a,b){
     return (b.creatoIl||'') > (a.creatoIl||'') ? 1 : -1;
   }).slice(0,5);
   const el = document.getElementById('dash-activity');
   if(!recenti.length){ el.innerHTML='<div class="empty">Nessuna attività</div>'; return; }
   el.innerHTML = recenti.map(function(u){
-    const badge = badgeStato(u.stato);
-    return `<div class="card" style="display:flex;align-items:center;gap:12px;padding:12px 14px">
-      <div class="user-ava" style="width:36px;height:36px;font-size:14px">${initials(u)}</div>
+    return `<div class="card" style="display:flex;align-items:center;gap:14px;padding:14px 18px;margin-bottom:10px">
+      ${avatarEl(u, 40)}
       <div style="flex:1;min-width:0">
-        <div style="font-weight:700;font-size:13px">${u.nome||''} ${u.cognome||''}</div>
-        <div style="font-size:11px;color:var(--txt2)">${u.email||''} · ${u.reparto||'–'}</div>
+        <div style="font-weight:700;font-size:14px">${u.nome||''} ${u.cognome||''}</div>
+        <div style="font-size:12px;color:var(--md-on-surface-var)">${u.email||''} · ${u.reparto||'–'}</div>
       </div>
-      ${badge}
+      ${chipStato(u.stato)}
     </div>`;
   }).join('');
 }
 
-// ── Utenti ──
-function initials(u) {
-  return ((u.nome||'?')[0]+(u.cognome||'?')[0]).toUpperCase();
-}
-function badgeStato(stato) {
-  const map = { approved:'badge-ok', pending:'badge-wait', rejected:'badge-rej' };
-  const lbl = { approved:'✅ Approvato', pending:'⏳ In attesa', rejected:'❌ Rifiutato' };
-  return `<span class="badge ${map[stato]||'badge-wait'}">${lbl[stato]||stato}</span>`;
-}
-
+// ── Utenti: filtri e render ──
 window.setUFilter = function(f) {
   _uFilter = f;
-  document.querySelectorAll('#u-filters .btn').forEach(function(b){ b.classList.remove('btn-p'); b.classList.add('btn-g'); });
-  const idx = ['','approved','pending','rejected'].indexOf(f);
-  const btns = document.querySelectorAll('#u-filters .btn');
-  if(btns[idx]) { btns[idx].classList.remove('btn-g'); btns[idx].classList.add('btn-p'); }
+  document.querySelectorAll('#u-filters .fchip').forEach(function(b){ b.classList.remove('on'); });
+  const idx = ['','approved','pending','rejected','sospeso'].indexOf(f);
+  const chips = document.querySelectorAll('#u-filters .fchip');
+  if(chips[idx]) chips[idx].classList.add('on');
   renderUtenti();
 };
 
@@ -586,42 +782,168 @@ function renderUtenti() {
     }
     return true;
   });
+
   const el = document.getElementById('utenti-list');
+  const isPending = _uFilter === 'pending';
+
+  // Mostra/nascondi bulk bar
+  const bulkBar = document.getElementById('bulk-bar');
+  bulkBar.classList.toggle('on', isPending && list.length > 0);
+
   if(!list.length){ el.innerHTML='<div class="empty">Nessun utente trovato</div>'; return; }
-  el.innerHTML = list.map(function(u){
-    const ruoloBadge = u.ruolo==='superadmin'
-      ? '<span class="badge badge-admin">🛡️ Superadmin</span>'
-      : u.ruolo==='comandante' ? '<span class="badge badge-admin">👑 Comandante</span>'
-      : u.ruolo==='vice' ? '<span class="badge" style="background:rgba(183,121,31,.12);color:var(--gold)">⭐ Vice</span>' : '';
-    return `<div class="user-card" id="uc-${u._uid}">
-      <div class="user-card-top">
-        <div class="user-ava">${initials(u)}</div>
-        <div style="flex:1;min-width:0">
-          <div class="user-name">${u.grado||''} ${u.nome||''} ${u.cognome||''}</div>
-          <div class="user-meta">${u.email||'–'}</div>
-          <div class="user-meta">🏛️ ${u.reparto||'Nessun reparto'}</div>
-          <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
-            ${badgeStato(u.stato)} ${ruoloBadge}
-          </div>
-        </div>
-        <button class="menu-btn" onclick="openDrop(event,'${u._uid}')">⋮</button>
-      </div>
+
+  if(isPending) {
+    // Tabella con checkbox per bulk approve
+    el.innerHTML = `<div class="table-wrap">
+      <table class="u-table">
+        <thead><tr>
+          <th><input type="checkbox" id="chk-all" onchange="toggleAllChk(this)"></th>
+          <th>Utente</th>
+          <th>Email</th>
+          <th>Reparto</th>
+          <th>Registrato</th>
+          <th>Azioni</th>
+        </tr></thead>
+        <tbody id="u-tbody">
+          ${list.map(function(u){
+            const data = u.creatoIl ? new Date(u.creatoIl).toLocaleDateString('it-IT') : '–';
+            return `<tr>
+              <td><input type="checkbox" class="u-chk" value="${u._uid}" onchange="updateBulkCount()"></td>
+              <td><div style="display:flex;align-items:center;gap:10px">
+                ${avatarEl(u,36)}
+                <div><div class="u-name">${u.grado||''} ${u.nome||''} ${u.cognome||''}</div>
+                <div class="u-meta">${chipStato(u.stato)}</div></div>
+              </div></td>
+              <td style="color:var(--md-on-surface-var)">${u.email||'–'}</td>
+              <td>${u.reparto||'–'}</td>
+              <td style="color:var(--md-on-surface-var)">${data}</td>
+              <td><button class="btn btn-g btn-sm" onclick="openEdit('${u._uid}')">✏️</button></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
     </div>`;
-  }).join('');
+  } else {
+    // Tabella standard con tasto Sospendi per approvati
+    el.innerHTML = `<div class="table-wrap">
+      <table class="u-table">
+        <thead><tr>
+          <th>Utente</th>
+          <th>Email</th>
+          <th>Reparto</th>
+          <th>Stato</th>
+          <th>Azioni</th>
+        </tr></thead>
+        <tbody>
+          ${list.map(function(u){
+            const ruoloBadge = u.ruolo==='superadmin'
+              ? '<span class="chip chip-admin">🛡️ Superadmin</span>'
+              : u.ruolo==='comandante' ? '<span class="chip chip-admin">👑 Comandante</span>'
+              : u.ruolo==='vice' ? '<span class="chip" style="background:#f3e8d0;color:#7a4f00">⭐ Vice</span>' : '';
+            const sospBtn = (u.stato==='approved')
+              ? `<button class="btn btn-warn btn-sm" onclick="sospendiUtente('${u._uid}')">🚫 Sospendi</button>`
+              : (u.stato==='sospeso')
+              ? `<button class="btn btn-p btn-sm" onclick="riabilitaUtente('${u._uid}')">✅ Riabilita</button>`
+              : '';
+            return `<tr>
+              <td><div style="display:flex;align-items:center;gap:10px">
+                ${avatarEl(u,36)}
+                <div><div class="u-name">${u.grado||''} ${u.nome||''} ${u.cognome||''}</div>
+                <div class="u-meta">${ruoloBadge}</div></div>
+              </div></td>
+              <td style="color:var(--md-on-surface-var)">${u.email||'–'}</td>
+              <td>${u.reparto||'–'}</td>
+              <td>${chipStato(u.stato)}</td>
+              <td style="display:flex;gap:6px;flex-wrap:wrap">
+                <button class="btn btn-g btn-sm" onclick="openEdit('${u._uid}')">✏️</button>
+                ${sospBtn}
+                <button class="btn btn-g btn-sm" onclick="openDrop(event,'${u._uid}')">⋮</button>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  }
 }
 
+// ── Checkbox bulk ──
+window.toggleAllChk = function(master) {
+  document.querySelectorAll('.u-chk').forEach(function(c){ c.checked = master.checked; });
+  updateBulkCount();
+};
+window.updateBulkCount = function() {
+  const sel = document.querySelectorAll('.u-chk:checked').length;
+  document.getElementById('bulk-count').textContent = sel + ' selezionati';
+  const allChk = document.getElementById('chk-all');
+  const total  = document.querySelectorAll('.u-chk').length;
+  if(allChk) allChk.indeterminate = sel > 0 && sel < total;
+};
+
+// ── Bulk Approve ──
+window.approvaSelezionati = async function() {
+  const checked = [...document.querySelectorAll('.u-chk:checked')].map(function(c){ return c.value; });
+  if(!checked.length){ toast('Nessun utente selezionato','err'); return; }
+  const ok = await showConfirm('Approva utenti', `Approvare ${checked.length} utenti selezionati?`, 'Approva', false);
+  if(!ok) return;
+  try {
+    await Promise.all(checked.map(function(uid){
+      return updateDoc(doc(db,'utenti',uid), { stato:'approved' });
+    }));
+    checked.forEach(function(uid){
+      const idx = _utenti.findIndex(function(x){ return x._uid===uid; });
+      if(idx>=0) _utenti[idx].stato='approved';
+    });
+    renderUtenti(); renderDash();
+    toast(`${checked.length} utenti approvati`, 'ok');
+  } catch(e){ toast('Errore: '+e.message,'err'); }
+};
+
+// ── Sospendi / Riabilita ──
+window.sospendiUtente = async function(uid) {
+  const u = _utenti.find(function(x){ return x._uid===uid; });
+  if(!u) return;
+  const ok = await showConfirm('Sospendi utente', `Sospendere ${u.nome} ${u.cognome}? L'utente non potrà accedere all'app.`, 'Sospendi', true);
+  if(!ok) return;
+  try {
+    await updateDoc(doc(db,'utenti',uid), { stato:'sospeso' });
+    const idx = _utenti.findIndex(function(x){ return x._uid===uid; });
+    if(idx>=0) _utenti[idx].stato='sospeso';
+    renderUtenti(); renderDash();
+    toast('Utente sospeso','ok');
+  } catch(e){ toast('Errore: '+e.message,'err'); }
+};
+
+window.riabilitaUtente = async function(uid) {
+  const u = _utenti.find(function(x){ return x._uid===uid; });
+  if(!u) return;
+  const ok = await showConfirm('Riabilita utente', `Riabilitare ${u.nome} ${u.cognome}?`, 'Riabilita', false);
+  if(!ok) return;
+  try {
+    await updateDoc(doc(db,'utenti',uid), { stato:'approved' });
+    const idx = _utenti.findIndex(function(x){ return x._uid===uid; });
+    if(idx>=0) _utenti[idx].stato='approved';
+    renderUtenti(); renderDash();
+    toast('Utente riabilitato','ok');
+  } catch(e){ toast('Errore: '+e.message,'err'); }
+};
+
+// ── Dropdown azioni ──
 window.openDrop = function(e, uid) {
   e.stopPropagation();
   if(_openDrop){ _openDrop.remove(); _openDrop=null; }
-  const card = document.getElementById('uc-'+uid);
+  const btn  = e.currentTarget;
   const drop = document.createElement('div');
   drop.className = 'dropdown';
+  drop.style.cssText = 'position:fixed;background:var(--md-card);border:1px solid var(--md-outline-var);border-radius:var(--radius-m);box-shadow:var(--shadow-3);z-index:1500;min-width:190px;overflow:hidden';
+  const rect = btn.getBoundingClientRect();
+  drop.style.top  = (rect.bottom + 4) + 'px';
+  drop.style.right = (window.innerWidth - rect.right) + 'px';
   drop.innerHTML = `
-    <div class="dropdown-item" onclick="openEdit('${uid}')">✏️ Modifica</div>
-    <div class="dropdown-item" onclick="scollegaReparto('${uid}')">🔗 Scollega da reparto</div>
-    <div class="dropdown-item danger" onclick="eliminaUtente('${uid}')">🗑️ Elimina account</div>`;
-  card.style.position='relative';
-  card.appendChild(drop);
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;color:var(--md-on-surface);transition:background .15s" onmouseover="this.style.background='var(--md-surface-1)'" onmouseout="this.style.background=''" onclick="openEdit('${uid}')">✏️ Modifica</div>
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;color:var(--md-on-surface);transition:background .15s" onmouseover="this.style.background='var(--md-surface-1)'" onmouseout="this.style.background=''" onclick="scollegaReparto('${uid}')">🔗 Scollega reparto</div>
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;color:var(--md-error);transition:background .15s" onmouseover="this.style.background='var(--md-error-container)'" onmouseout="this.style.background=''" onclick="eliminaUtente('${uid}')">🗑️ Elimina account</div>`;
+  document.body.appendChild(drop);
   _openDrop = drop;
 };
 
@@ -629,17 +951,17 @@ window.openEdit = function(uid) {
   if(_openDrop){ _openDrop.remove(); _openDrop=null; }
   const u = _utenti.find(function(x){ return x._uid===uid; });
   if(!u) return;
-  document.getElementById('edit-uid').value    = uid;
-  document.getElementById('edit-nome').value   = u.nome||'';
-  document.getElementById('edit-cognome').value= u.cognome||'';
-  document.getElementById('edit-grado').value  = u.grado||'';
-  document.getElementById('edit-ruolo').value  = u.ruolo||'addetto';
-  document.getElementById('edit-stato').value  = u.stato||'pending';
+  document.getElementById('edit-uid').value     = uid;
+  document.getElementById('edit-nome').value    = u.nome||'';
+  document.getElementById('edit-cognome').value = u.cognome||'';
+  document.getElementById('edit-grado').value   = u.grado||'';
+  document.getElementById('edit-ruolo').value   = u.ruolo||'addetto';
+  document.getElementById('edit-stato').value   = u.stato||'pending';
   document.getElementById('m-edit').classList.add('on');
 };
 
 window.saveEdit = async function() {
-  const uid = document.getElementById('edit-uid').value;
+  const uid  = document.getElementById('edit-uid').value;
   const data = {
     nome:    document.getElementById('edit-nome').value.trim(),
     cognome: document.getElementById('edit-cognome').value.trim(),
@@ -649,7 +971,6 @@ window.saveEdit = async function() {
   };
   try {
     await updateDoc(doc(db,'utenti',uid), data);
-    // Aggiorna anche nel reparto se esiste
     const u = _utenti.find(function(x){ return x._uid===uid; });
     if(u && u.reparto) {
       const repId = u.reparto.toLowerCase().replace(/\s+/g,'_');
@@ -667,7 +988,8 @@ window.scollegaReparto = async function(uid) {
   if(_openDrop){ _openDrop.remove(); _openDrop=null; }
   const u = _utenti.find(function(x){ return x._uid===uid; });
   if(!u || !u.reparto){ toast('Utente non ha un reparto','err'); return; }
-  if(!confirm(`Scollega ${u.nome} ${u.cognome} dal reparto "${u.reparto}"?`)) return;
+  const ok = await showConfirm('Scollega reparto', `Scollegare ${u.nome} ${u.cognome} dal reparto "${u.reparto}"?`, 'Scollega', true);
+  if(!ok) return;
   try {
     await updateDoc(doc(db,'utenti',uid), { reparto:'', ruolo:'addetto', stato:'pending' });
     const repId = u.reparto.toLowerCase().replace(/\s+/g,'_');
@@ -683,21 +1005,19 @@ window.eliminaUtente = async function(uid) {
   if(_openDrop){ _openDrop.remove(); _openDrop=null; }
   const u = _utenti.find(function(x){ return x._uid===uid; });
   if(!u) return;
-  if(!confirm(`⚠️ Eliminare definitivamente ${u.nome} ${u.cognome}?\nQuesta azione è irreversibile.`)) return;
+  const ok = await showConfirm('Elimina account', `Eliminare definitivamente ${u.nome} ${u.cognome}? Questa azione è irreversibile.`, 'Elimina', true);
+  if(!ok) return;
   try {
-    // Elimina sub-collections
     const todoSnap = await getDocs(collection(db,'utenti',uid,'todo'));
     const agSnap   = await getDocs(collection(db,'utenti',uid,'agenda'));
     const ops = [];
     todoSnap.forEach(function(d){ ops.push(deleteDoc(doc(db,'utenti',uid,'todo',d.id))); });
     agSnap.forEach(function(d){   ops.push(deleteDoc(doc(db,'utenti',uid,'agenda',d.id))); });
     await Promise.all(ops);
-    // Elimina dal reparto
     if(u.reparto) {
       const repId = u.reparto.toLowerCase().replace(/\s+/g,'_');
       try { await deleteDoc(doc(db,'reparti',repId,'utenti',uid)); } catch(e){}
     }
-    // Elimina documento principale
     await deleteDoc(doc(db,'utenti',uid));
     _utenti = _utenti.filter(function(x){ return x._uid!==uid; });
     renderUtenti(); renderDash();
@@ -723,14 +1043,14 @@ function renderReparti() {
         <span class="acc-chev">▼</span>
       </div>
       <div class="acc-body">
-        <div class="acc-row"><span style="color:var(--txt2)">Comandante</span>
-          <strong>${comandante ? (comandante.grado||'')+ ' '+(comandante.nome||'')+' '+(comandante.cognome||'') : '–'}</strong></div>
-        <div class="acc-row"><span style="color:var(--txt2)">Militari iscritti</span><strong>${r.utenti.length}</strong></div>
-        <div class="acc-row"><span style="color:var(--txt2)">Turni registrati</span><strong>${r.turniCount}</strong></div>
-        <div class="acc-row"><span style="color:var(--txt2)">ID reparto</span><code style="font-size:11px;color:var(--txt3)">${repId}</code></div>
-        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn btn-d" style="font-size:12px;padding:8px 14px" onclick="resettaComando('${repId}')">🔄 Resetta Comando</button>
-          <button class="btn btn-g" style="font-size:12px;padding:8px 14px" onclick="vediUtentiReparto('${repId}')">👥 Vedi utenti</button>
+        <div class="acc-row"><span style="color:var(--md-on-surface-var)">Comandante</span>
+          <strong>${comandante ? (comandante.grado||'')+' '+(comandante.nome||'')+' '+(comandante.cognome||'') : '–'}</strong></div>
+        <div class="acc-row"><span style="color:var(--md-on-surface-var)">Militari iscritti</span><strong>${r.utenti.length}</strong></div>
+        <div class="acc-row"><span style="color:var(--md-on-surface-var)">Turni registrati</span><strong>${r.turniCount}</strong></div>
+        <div class="acc-row"><span style="color:var(--md-on-surface-var)">ID reparto</span><code style="font-size:11px;color:var(--md-outline)">${repId}</code></div>
+        <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-d btn-sm" onclick="resettaComando('${repId}')">🔄 Resetta Comando</button>
+          <button class="btn btn-g btn-sm" onclick="vediUtentiReparto('${repId}')">👥 Vedi utenti</button>
         </div>
       </div>
     </div>`;
@@ -745,7 +1065,8 @@ window.toggleAcc = function(repId) {
 window.resettaComando = async function(repId) {
   const r = _reparti[repId];
   const nomeRep = repId.replace(/_/g,' ');
-  if(!confirm(`Resettare il comando di "${nomeRep}"?\nTutti i ruoli speciali diventeranno "addetto".`)) return;
+  const ok = await showConfirm('Resetta Comando', `Resettare il comando di "${nomeRep}"? Tutti i ruoli speciali diventeranno "addetto".`, 'Resetta', true);
+  if(!ok) return;
   try {
     const ops = r.utenti.map(async function(u){
       if(u.ruolo==='comandante'||u.ruolo==='vice'){
@@ -764,15 +1085,137 @@ window.resettaComando = async function(repId) {
   } catch(e){ toast('Errore: '+e.message,'err'); }
 };
 
+// ── FIX BUG: vediUtentiReparto ora filtra correttamente per reparto ──
 window.vediUtentiReparto = function(repId) {
-  setUFilter('');
+  // Resetta il filtro stato e imposta la ricerca per nome reparto
+  _uFilter = '';
+  document.querySelectorAll('#u-filters .fchip').forEach(function(b){ b.classList.remove('on'); });
+  const firstChip = document.querySelector('#u-filters .fchip');
+  if(firstChip) firstChip.classList.add('on');
+  // Usa il nome leggibile del reparto come termine di ricerca
   const nomeRep = repId.replace(/_/g,' ');
   document.getElementById('u-search').value = nomeRep;
   goPage('utenti');
-  filterUtenti();
+  renderUtenti();
+};
+
+// ── Manutenzione: Elimina turni vecchi ──
+window.eliminaTurniVecchi = async function() {
+  const ok = await showConfirm(
+    '⚠️ Elimina turni antichi',
+    'Verranno eliminati DEFINITIVAMENTE tutti i turni antecedenti a 6 mesi fa. Questa operazione non è reversibile.',
+    'Elimina', true
+  );
+  if(!ok) return;
+
+  const resultEl = document.getElementById('maint-turni-result');
+  resultEl.textContent = '⏳ Ricerca turni in corso...';
+
+  const seimesiFA = new Date();
+  seimesiFA.setMonth(seimesiFA.getMonth() - 6);
+  const seimesiFAStr = seimesiFA.toISOString().split('T')[0]; // YYYY-MM-DD
+
+  let totalDeleted = 0;
+  let errors = 0;
+
+  try {
+    const repartiIds = Object.keys(_reparti);
+    if(!repartiIds.length) {
+      // Prova a caricare i reparti se non ancora caricati
+      const snap = await getDocs(collection(db,'utenti'));
+      const ids = new Set();
+      snap.forEach(function(d){ const r = d.data().reparto; if(r && !r.startsWith('privato_')) ids.add(r); });
+      repartiIds.push(...ids);
+    }
+
+    for(const repId of repartiIds) {
+      try {
+        const turniSnap = await getDocs(collection(db,'reparti',repId,'turni'));
+        const toDelete = [];
+        turniSnap.forEach(function(d){
+          const data = d.data();
+          // Supporta sia campo 'data' stringa YYYY-MM-DD che Timestamp
+          let dataStr = '';
+          if(data.data) {
+            dataStr = typeof data.data === 'string' ? data.data : (data.data.toDate ? data.data.toDate().toISOString().split('T')[0] : '');
+          } else if(data.date) {
+            dataStr = typeof data.date === 'string' ? data.date : (data.date.toDate ? data.date.toDate().toISOString().split('T')[0] : '');
+          } else if(data.timestamp) {
+            dataStr = data.timestamp.toDate ? data.timestamp.toDate().toISOString().split('T')[0] : '';
+          }
+          if(dataStr && dataStr < seimesiFAStr) toDelete.push(d.id);
+        });
+
+        // Elimina in batch (max 500 per batch)
+        for(let i=0; i<toDelete.length; i+=400) {
+          const batch = writeBatch(db);
+          toDelete.slice(i, i+400).forEach(function(id){
+            batch.delete(doc(db,'reparti',repId,'turni',id));
+          });
+          await batch.commit();
+        }
+        totalDeleted += toDelete.length;
+      } catch(e) {
+        console.warn('Errore reparto', repId, e.message);
+        errors++;
+      }
+    }
+
+    const msg = `✅ Eliminati ${totalDeleted} turni antecedenti al ${seimesiFA.toLocaleDateString('it-IT')}` +
+                (errors > 0 ? ` (${errors} reparti con errori)` : '');
+    resultEl.textContent = msg;
+    toast(`Eliminati ${totalDeleted} turni`, 'ok');
+    // Ricarica i conteggi
+    await loadReparti();
+    renderDash();
+  } catch(e) {
+    resultEl.textContent = '❌ Errore: ' + e.message;
+    toast('Errore eliminazione: '+e.message,'err');
+  }
+};
+
+// ── Manutenzione: Esporta CSV ──
+window.esportaUtentiCSV = async function() {
+  try {
+    toast('Generazione CSV in corso...','info');
+    const snap = await getDocs(collection(db,'utenti'));
+    const rows = [['UID','Nome','Cognome','Email','Reparto','Grado','Ruolo','Stato','Registrato']];
+    snap.forEach(function(d){
+      const u = d.data();
+      rows.push([
+        d.id,
+        u.nome||'',
+        u.cognome||'',
+        u.email||'',
+        u.reparto||'',
+        u.grado||'',
+        u.ruolo||'',
+        u.stato||'',
+        u.creatoIl ? new Date(u.creatoIl).toLocaleDateString('it-IT') : ''
+      ]);
+    });
+    const csv = rows.map(function(r){
+      return r.map(function(cell){
+        const s = String(cell).replace(/"/g,'""');
+        return s.includes(',') || s.includes('"') || s.includes('\n') ? '"'+s+'"' : s;
+      }).join(',');
+    }).join('\r\n');
+
+    const blob = new Blob(['\uFEFF'+csv], { type:'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = 'utenti_cturni_' + new Date().toISOString().split('T')[0] + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast('CSV scaricato con successo','ok');
+  } catch(e){ toast('Errore export: '+e.message,'err'); }
 };
 
 // ── Esponi globali ──
 window._db = db;
 </script>
+</body>
 </html>
