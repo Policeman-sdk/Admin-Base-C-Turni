@@ -1,8 +1,26 @@
 import {
-  collection, doc, getDocs, query, where, deleteDoc, writeBatch, Timestamp
+  collection, doc, getDocs, getDoc, query, where, deleteDoc, writeBatch, Timestamp
 } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
 
 const db = window._db;
+
+// Sottocollezioni note di un reparto (per backup completo)
+const REP_SUBS = ['utenti', 'persone', 'personale', 'turni', 'richieste', 'todo_condivisi', 'agenda_condivisa', 'bacheca', 'config', 'link_utenti', 'dino_scores'];
+
+// Tutti gli id reparto: collezione reparti (fonte di verità) + quelli presenti sugli utenti
+async function getAllRepIds() {
+  const ids = new Set();
+  try {
+    const rSnap = await getDocs(collection(db, 'reparti'));
+    rSnap.docs.forEach(d => ids.add(d.id));
+  } catch (e) { /* permessi */ }
+  if (!window.AdminState.utenti.length) {
+    const snap = await getDocs(collection(db, 'utenti'));
+    window.AdminState.utenti = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }
+  window.AdminState.utenti.forEach(u => { if (u.reparto && !u.reparto.startsWith('privato_')) ids.add(u.reparto); });
+  return [...ids];
+}
 
 window.puliziaVecchiTurni = async function() {
   if (!await window.confirm2('Eliminare tutti i turni più vecchi di 6 mesi da tutti i reparti?', 'Pulizia turni', 'Elimina')) return;
@@ -10,11 +28,7 @@ window.puliziaVecchiTurni = async function() {
   const cutoffStr = cutoff.toISOString().slice(0, 10);
   let count = 0;
   try {
-    if (!window.AdminState.utenti.length) {
-      const snap = await getDocs(collection(db, 'utenti'));
-      window.AdminState.utenti = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    }
-    const repIds = [...new Set(window.AdminState.utenti.map(u => u.reparto).filter(r => r && !r.startsWith('privato_')))];
+    const repIds = await getAllRepIds();
     for (const rid of repIds) {
       try {
         const tSnap = await getDocs(collection(db, 'reparti', rid, 'turni'));
@@ -51,10 +65,10 @@ window.puliziaNotifichePush = async function() {
 
 window.exportUtentiCSV = async function() {
   const snap = await getDocs(collection(db, 'utenti'));
-  const rows = [['UID', 'Nome', 'Cognome', 'Email', 'Grado', 'Ruolo', 'Stato', 'Reparto', 'FerieRes', 'FerieUsate', 'Recuperi']];
+  const rows = [['UID', 'Nome', 'Cognome', 'Email', 'Grado', 'Ruolo', 'Stato', 'Reparto', 'FerieRes', 'FerieUsate', 'Recuperi', 'IscrittoIl']];
   snap.docs.forEach(d => {
     const u = d.data();
-    rows.push([d.id, u.nome || '', u.cognome || '', u.email || '', u.grado || '', u.ruolo || '', u.stato || '', u.reparto || '', u.ferieRes || 0, u.ferieUsate || 0, u.recuperi || 0]);
+    rows.push([d.id, u.nome || '', u.cognome || '', u.email || '', u.grado || '', u.ruolo || '', u.stato || '', u.reparto || '', u.ferieRes || 0, u.ferieUsate || 0, u.recuperi || 0, window.fmtTs(window.getDataIscrizione(u))]);
   });
   window.downloadCSV('utenti_export.csv', rows);
 };
@@ -62,11 +76,7 @@ window.exportUtentiCSV = async function() {
 window.exportTurniCSVAll = async function() {
   const mese = document.getElementById('maint-turni-mese').value;
   const rows = [['Reparto', 'Data', 'Nome', 'Tipo', 'Note', 'UID']];
-  if (!window.AdminState.utenti.length) {
-    const snap = await getDocs(collection(db, 'utenti'));
-    window.AdminState.utenti = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  }
-  const repIds = [...new Set(window.AdminState.utenti.map(u => u.reparto).filter(r => r && !r.startsWith('privato_')))];
+  const repIds = await getAllRepIds();
   for (const rid of repIds) {
     try {
       const tSnap = await getDocs(collection(db, 'reparti', rid, 'turni'));
@@ -78,15 +88,32 @@ window.exportTurniCSVAll = async function() {
 };
 
 window.backupJSON = async function() {
-  const uSnap = await getDocs(collection(db, 'utenti'));
-  const utenti = uSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-  const repIds = [...new Set(utenti.map(u => u.reparto).filter(r => r && !r.startsWith('privato_')))];
-  const backup = {
-    exportedAt: new Date().toISOString(),
-    utenti,
-    reparti: repIds.map(id => ({ id }))
-  };
-  window.downloadJSON(`backup_cturni_${new Date().toISOString().slice(0, 10)}.json`, backup);
+  try {
+    const uSnap = await getDocs(collection(db, 'utenti'));
+    const utenti = uSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    window.AdminState.utenti = utenti;
+    const repIds = await getAllRepIds();
+    const reparti = {};
+    for (const rid of repIds) {
+      const data = {};
+      try { const rs = await getDoc(doc(db, 'reparti', rid)); data._doc = rs.exists() ? rs.data() : null; } catch (e) {}
+      for (const sub of REP_SUBS) {
+        try {
+          const s = await getDocs(collection(db, 'reparti', rid, sub));
+          if (s.size) data[sub] = s.docs.map(d => ({ id: d.id, ...d.data() }));
+        } catch (e) { /* sottocollezione assente */ }
+      }
+      reparti[rid] = data;
+    }
+    let notifiche_push = [];
+    try {
+      const pSnap = await getDocs(collection(db, 'notifiche_push'));
+      notifiche_push = pSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    } catch (e) {}
+    const backup = { exportedAt: new Date().toISOString(), utenti, reparti, notifiche_push };
+    window.downloadJSON(`backup_cturni_${new Date().toISOString().slice(0, 10)}.json`, backup);
+    window.toast('Backup completo scaricato', 'success');
+  } catch (e) { window.toast('Errore backup: ' + e.message, 'error'); }
 };
 
 window.reloadAll = async function() {
@@ -103,7 +130,7 @@ window.loadDBStats = async function() {
   try {
     const uSnap = await getDocs(collection(db, 'utenti'));
     if (!window.AdminState.utenti.length) window.AdminState.utenti = uSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-    const repIds = [...new Set(window.AdminState.utenti.map(u => u.reparto).filter(r => r && !r.startsWith('privato_')))];
+    const repIds = await getAllRepIds();
     const pSnap = await getDocs(collection(db, 'notifiche_push'));
     let turniTot = 0, personeTot = 0;
     for (const rid of repIds) {

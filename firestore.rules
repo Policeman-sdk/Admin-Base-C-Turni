@@ -1,0 +1,62 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    // Il ruolo superadmin è la chiave: accesso in lettura/scrittura su tutto.
+    function isSuperAdmin() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/utenti/$(request.auth.uid))
+        && get(/databases/$(database)/documents/utenti/$(request.auth.uid)).data.ruolo == 'superadmin';
+    }
+
+    // ── PROFILI GLOBALI ──
+    match /utenti/{uid} {
+      allow read: if isSignedIn();
+      // il client normale NON può auto-assegnarsi il ruolo: in creazione è forzato a 'addetto'
+      allow create: if isSignedIn() && request.auth.uid == uid
+        && request.resource.data.ruolo == 'addetto';
+      // un utente può modificare il proprio profilo ma NON cambiarsi il ruolo
+      allow update: if isSuperAdmin()
+        || (isSignedIn() && request.auth.uid == uid
+            && request.resource.data.ruolo == resource.data.ruolo);
+      allow delete: if isSuperAdmin();
+
+      // sottocollezioni globali (agenda, todo, notifiche…): owner o superadmin
+      match /{sub=**} {
+        allow read, write: if isSuperAdmin() || (isSignedIn() && uid == request.auth.uid);
+      }
+    }
+
+    // ── REPARTI E SOTTOC OLLEZIONI ──
+    match /reparti/{rep} {
+      allow read: if isSignedIn();
+      allow write: if isSuperAdmin();
+
+      match /{sub=**} {
+        allow read: if isSignedIn();
+        allow write: if isSuperAdmin();
+      }
+    }
+
+    // ── CODA PUSH (solo admin legge/modifica/elimina) ──
+    match /notifiche_push/{id} {
+      allow read, update, delete: if isSuperAdmin();
+      allow create: if isSignedIn();
+    }
+
+    // ── AUDIT LOG ──
+    match /log_comando/{id} {
+      allow read: if isSuperAdmin();
+      allow create: if isSuperAdmin();
+    }
+
+    // ── CONFIGURAZIONE GLOBALE ──
+    match /config/{id} {
+      allow read: if isSignedIn();
+      allow write: if isSuperAdmin();
+    }
+  }
+}

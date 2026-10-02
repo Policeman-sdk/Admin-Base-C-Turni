@@ -40,12 +40,18 @@ window.inviaPushNotifica = async function() {
       if (u && u.fcmToken) targets = [u];
     }
     if (!targets.length) { window.toast('Nessun utente con FCM token trovato', 'warn'); return; }
+    const inApp = document.getElementById('push-inapp') ? document.getElementById('push-inapp').checked : true;
     const batch = writeBatch(db);
     targets.forEach(u => {
       const ref = doc(collection(db, 'notifiche_push'));
       batch.set(ref, { uid: u.id, title, body, creatoIl, inviata: false });
+      if (inApp) {
+        const nref = doc(collection(db, 'utenti', u.id, 'notifiche'));
+        batch.set(nref, { id: nref.id, uid: u.id, titolo: title, body, ts: creatoIl, letta: false, tipo: 'admin' });
+      }
     });
     await batch.commit();
+    await window.logAzione('invio_notifica', tipo, `${targets.length} destinatari: ${title}`);
     window.toast(`Notifica inviata a ${targets.length} utenti`, 'success');
     document.getElementById('push-title').value = '';
     document.getElementById('push-body').value = '';

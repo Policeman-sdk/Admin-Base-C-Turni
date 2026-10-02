@@ -257,6 +257,7 @@ tr:hover td{background:var(--surface2)}
       <a href="#" data-section="agenda"><span class="icon">📋</span> Agenda & Todo</a>
       <a href="#" data-section="notifiche"><span class="icon">🔔</span> Notifiche Push</a>
       <a href="#" data-section="manutenzione"><span class="icon">🔧</span> Manutenzione</a>
+      <a href="#" data-section="sistema"><span class="icon">🛡️</span> Sistema</a>
     </nav>
     <div class="user-info" id="sidebar-user">Caricamento...</div>
   </aside>
@@ -284,6 +285,7 @@ tr:hover td{background:var(--surface2)}
           <div class="card">
             <h3 style="margin-bottom:16px;font-size:1rem">Ultimi utenti registrati</h3>
             <div id="recent-users"></div>
+            <div id="stato-breakdown" class="mt-16"></div>
           </div>
           <div class="card">
             <h3 style="margin-bottom:16px;font-size:1rem">Turni per tipo</h3>
@@ -319,7 +321,13 @@ tr:hover td{background:var(--surface2)}
 
       <!-- ═══ REPARTI ═══ -->
       <section id="sec-reparti" class="section">
-        <div class="section-header"><h2>Reparti</h2><button class="btn btn-ghost btn-sm" onclick="loadReparti()">🔄 Aggiorna</button></div>
+        <div class="section-header">
+          <h2>Reparti</h2>
+          <div class="flex-gap">
+            <button class="btn btn-primary btn-sm" onclick="openNewRepartoModal()">+ Nuovo reparto</button>
+            <button class="btn btn-ghost btn-sm" onclick="loadReparti()">🔄 Aggiorna</button>
+          </div>
+        </div>
         <div id="reparti-list"></div>
         <div id="reparti-loading" class="loading"><div class="spinner"></div></div>
       </section>
@@ -337,13 +345,17 @@ tr:hover td{background:var(--surface2)}
               <label>Mese</label>
               <input type="month" id="turni-mese" onchange="loadTurni()">
             </div>
+            <div class="form-group" style="margin:0;flex:1;min-width:160px">
+              <label>Persona / PID / UID</label>
+              <input type="text" id="turni-persona" placeholder="🔍 filtra..." oninput="loadTurni()">
+            </div>
             <button class="btn btn-primary btn-sm" style="align-self:flex-end" onclick="openTurnoModal()">+ Aggiungi</button>
             <button class="btn btn-ghost btn-sm" style="align-self:flex-end" onclick="exportTurniCSV()">📥 CSV</button>
           </div>
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Data</th><th>Persona</th><th>Tipo</th><th>Note</th><th>Azioni</th></tr></thead>
+            <thead><tr><th>Data</th><th>Persona</th><th>Tipo</th><th>Orario</th><th>Codice</th><th>Categoria</th><th>Note</th><th>Azioni</th></tr></thead>
             <tbody id="turni-tbody"></tbody>
           </table>
         </div>
@@ -431,6 +443,7 @@ tr:hover td{background:var(--surface2)}
               <label>Messaggio</label>
               <textarea id="push-body" rows="3" placeholder="Testo del messaggio"></textarea>
             </div>
+            <label style="display:flex;gap:8px;align-items:center;font-weight:400;margin-bottom:12px"><input type="checkbox" id="push-inapp" checked> Crea anche notifica in-app (utenti/{uid}/notifiche)</label>
             <button class="btn btn-primary" onclick="inviaPushNotifica()">🔔 Invia notifica</button>
           </div>
           <div class="card">
@@ -481,6 +494,21 @@ tr:hover td{background:var(--surface2)}
             <button class="btn btn-ghost btn-sm mt-12" onclick="loadDBStats()">Aggiorna statistiche</button>
           </div>
         </div>
+      </section>
+
+      <!-- ═══ SISTEMA ═══ -->
+      <section id="sec-sistema" class="section">
+        <div class="section-header"><h2>Sistema</h2></div>
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchSistemaTab('superadmin',this)">🛡️ Superadmin</button>
+          <button class="tab-btn" onclick="switchSistemaTab('log',this)">📜 Audit Log</button>
+          <button class="tab-btn" onclick="switchSistemaTab('dino',this)">🏆 Leaderboard Dino</button>
+          <button class="tab-btn" onclick="switchSistemaTab('global',this)">⚙️ Impostazioni globali</button>
+        </div>
+        <div id="sis-tab-superadmin" class="tab-pane active"></div>
+        <div id="sis-tab-log" class="tab-pane"></div>
+        <div id="sis-tab-dino" class="tab-pane"></div>
+        <div id="sis-tab-global" class="tab-pane"></div>
       </section>
 
     </div><!-- /content -->
@@ -552,6 +580,45 @@ tr:hover td{background:var(--surface2)}
         <div class="form-group"><label>Ferie usate</label><input type="number" id="edit-ferieUsate" min="0"></div>
         <div class="form-group"><label>Recuperi</label><input type="number" id="edit-recuperi" min="0"></div>
       </div>
+      <div class="divider"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Email</label><input type="email" id="edit-email"></div>
+        <div class="form-group"><label>Tipo</label><input type="text" id="edit-tipo"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Tipo struttura</label><input type="text" id="edit-tipoStruttura"></div>
+        <div class="form-group"><label>Modalità</label><input type="text" id="edit-modalita" placeholder="es. personale / reparto"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Tema</label><input type="text" id="edit-tema"></div>
+        <div class="form-group"><label>Meteo città</label><input type="text" id="edit-meteoCitta"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>myPid (persona collegata)</label><input type="text" id="edit-myPid"></div>
+        <div class="form-group"><label>Avatar URL (ava)</label><input type="text" id="edit-ava"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Privacy: condividi turni</label>
+          <select id="edit-priv-condividi"><option value="">—</option><option value="true">Sì</option><option value="false">No</option></select>
+        </div>
+        <div class="form-group"><label>Privacy: TOS accettati</label>
+          <select id="edit-priv-tos"><option value="">—</option><option value="true">Sì</option><option value="false">No</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Notifica preferita (notif_pre)</label><input type="text" id="edit-notifPre"></div>
+        <div class="form-group" style="justify-content:flex-end;display:flex;align-items:flex-end"><label style="display:flex;gap:6px;align-items:center;font-weight:400"><input type="checkbox" id="edit-notifPreSwitch"> Notifiche attive</label></div>
+      </div>
+      <div class="divider"></div>
+      <p class="text-muted" style="font-size:.8rem;margin-bottom:8px">Dati personali sincronizzati (JSON). Modificali con cautela: devono restare compatibili con l'app militari.</p>
+      <div class="form-group"><label>Licenze pool (licenzePool)</label><textarea id="edit-licenzePool" rows="2" placeholder='[{"anno":2026,"giorni":30}]'></textarea></div>
+      <div class="form-group"><label>Permessi studio monte (permessiStudioMonte)</label><textarea id="edit-permessiStudioMonte" rows="2" placeholder='{"2026":12}'></textarea></div>
+      <div class="form-group"><label>Straordinari (straordinari)</label><textarea id="edit-straordinari" rows="2" placeholder='[]'></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label>Recuperi (ct_recuperi)</label><textarea id="edit-ctRecuperi" rows="2" placeholder='[]'></textarea></div>
+        <div class="form-group"><label>Feste soppresse (ct_fest_sopp)</label><textarea id="edit-ctFestSopp" rows="2" placeholder='[]'></textarea></div>
+      </div>
+      <div class="form-group"><label>Preferenze notifiche (notif_prefs)</label><textarea id="edit-notifPrefs" rows="2" placeholder='{}'></textarea></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-utente')">Annulla</button>
@@ -572,23 +639,23 @@ tr:hover td{background:var(--surface2)}
       <input type="hidden" id="turno-reparto-id">
       <div class="form-row">
         <div class="form-group"><label>Data</label><input type="date" id="turno-data"></div>
-        <div class="form-group"><label>Tipo</label>
-          <select id="turno-tipo">
-            <option value="mattina">Mattina</option>
-            <option value="pomeriggio">Pomeriggio</option>
-            <option value="notte">Notte</option>
-            <option value="riposo">Riposo</option>
-            <option value="ferie">Ferie</option>
-            <option value="malattia">Malattia</option>
-            <option value="licenza">Licenza</option>
-            <option value="recupero">Recupero</option>
-          </select>
-        </div>
+        <div class="form-group"><label>Orario</label><input type="text" id="turno-orario" placeholder="es. 07:00-14:00"></div>
       </div>
-      <div class="form-group"><label>Persona (uid o nome)</label><input type="text" id="turno-uid" placeholder="UID o nome"></div>
-      <div class="form-group"><label>Nome visualizzato</label><input type="text" id="turno-nome"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Tipo</label>
+          <input type="text" id="turno-tipo" list="turno-tipi-list" placeholder="M / P / N / ferie...">
+          <datalist id="turno-tipi-list"></datalist>
+        </div>
+        <div class="form-group"><label>Codice</label><input type="text" id="turno-codice"></div>
+      </div>
+      <div class="form-group"><label>Categoria evento</label><input type="text" id="turno-categoria_evento"></div>
+      <div class="form-row">
+        <div class="form-group"><label>PID (persona)</label><input type="text" id="turno-pid" placeholder="id anagrafica interna"></div>
+        <div class="form-group"><label>Nome persona (pnome)</label><input type="text" id="turno-pnome"></div>
+      </div>
+      <div class="form-group"><label>UID / Owner (uid, ownerUid, userId)</label><input type="text" id="turno-uid" placeholder="uid dell'utente militari"></div>
       <div class="form-group"><label>Note</label><textarea id="turno-note" rows="2"></textarea></div>
-      <div class="form-group"><label>Colore</label><input type="color" id="turno-colore" value="#1a6b4a"></div>
+      <div class="form-group"><label>Colore (opzionale)</label><input type="color" id="turno-colore" value="#1a6b4a"></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-turno')">Annulla</button>
@@ -597,7 +664,7 @@ tr:hover td{background:var(--surface2)}
   </div>
 </div>
 
-<!-- ═══ MODAL REPARTO INFO ═══ -->
+<!-- ═══ MODAL REPARTO INFO (modifica / rinomina) ═══ -->
 <div class="modal-overlay" id="modal-reparto">
   <div class="modal">
     <div class="modal-header">
@@ -606,20 +673,98 @@ tr:hover td{background:var(--surface2)}
     </div>
     <div class="modal-body">
       <input type="hidden" id="rep-id">
-      <div class="form-group"><label>Nome reparto</label><input type="text" id="rep-nome"></div>
-      <div class="form-group"><label>Tipo struttura</label>
-        <select id="rep-tipo">
-          <option value="stazione">Stazione</option>
-          <option value="compagnia">Compagnia</option>
-          <option value="gruppo">Gruppo</option>
-          <option value="legione">Legione</option>
-          <option value="altro">Altro</option>
-        </select>
+      <div class="form-group"><label>ID reparto (normalizzato, non modificabile)</label><input type="text" id="rep-id-display" disabled></div>
+      <div class="form-group"><label>Nome reparto (visualizzato)</label><input type="text" id="rep-nome"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Tipo struttura</label>
+          <select id="rep-tipoStruttura">
+            <option value="stazione">Stazione</option>
+            <option value="compagnia">Compagnia</option>
+            <option value="gruppo">Gruppo</option>
+            <option value="legione">Legione</option>
+            <option value="altro">Altro</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Specialità</label><input type="text" id="rep-specialita" placeholder="es. ordinaria"></div>
       </div>
+      <div class="form-group"><label>Sede</label><input type="text" id="rep-sede" placeholder="es. monza"></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-reparto')">Annulla</button>
       <button class="btn btn-primary btn-sm" onclick="saveRepartoInfo()">Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL NUOVO REPARTO ═══ -->
+<div class="modal-overlay" id="modal-new-reparto">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Nuovo reparto</h3>
+      <button class="btn-close" onclick="closeModal('modal-new-reparto')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label>Nome visualizzato (opzionale)</label><input type="text" id="new-rep-nome" placeholder="es. Compagnia Monza"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Tipo struttura *</label>
+          <select id="new-rep-tipoStruttura" onchange="updateRepIdPreview()">
+            <option value="stazione">Stazione</option>
+            <option value="compagnia">Compagnia</option>
+            <option value="gruppo">Gruppo</option>
+            <option value="legione">Legione</option>
+            <option value="altro">Altro</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Specialità</label><input type="text" id="new-rep-specialita" placeholder="es. ordinaria" oninput="updateRepIdPreview()"></div>
+      </div>
+      <div class="form-group"><label>Sede *</label><input type="text" id="new-rep-sede" placeholder="es. monza" oninput="updateRepIdPreview()"></div>
+      <div class="form-group"><label>ID reparto che verrà creato</label><div id="new-rep-preview" style="font-weight:600">—</div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-new-reparto')">Annulla</button>
+      <button class="btn btn-primary btn-sm" onclick="saveNewReparto()">Crea reparto</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL TRASFERISCI UTENTE ═══ -->
+<div class="modal-overlay" id="modal-trasferisci">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Trasferisci utente</h3>
+      <button class="btn-close" onclick="closeModal('modal-trasferisci')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="tr-uid">
+      <div class="form-group"><label>Utente</label><input type="text" id="tr-utente-display" disabled></div>
+      <div class="form-group"><label>Reparto attuale</label><input type="text" id="tr-old-display" disabled></div>
+      <div class="form-group"><label>Nuovo reparto</label><select id="tr-new-rep"></select></div>
+      <p class="text-muted" style="font-size:.8rem">Il vecchio reparto viene rimosso; nel nuovo l'utente entra come <strong>pending</strong> (oppure <strong>approved</strong> se sei superadmin).</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-trasferisci')">Annulla</button>
+      <button class="btn btn-primary btn-sm" onclick="saveTrasferimento()">Trasferisci</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL IMPORT PERSONE (Excel/CSV) ═══ -->
+<div class="modal-overlay" id="modal-import-persone">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Importa persone da Excel/CSV</h3>
+      <button class="btn-close" onclick="closeModal('modal-import-persone')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="import-reparto-id">
+      <p class="text-muted" style="font-size:.85rem;margin-bottom:10px">Incolla le righe copiate da Excel (colonne: <strong>Nome</strong> [Tab / ; / ,] <strong>Grado</strong> [delim] <strong>FerieRes</strong>). Una persona per riga.</p>
+      <div class="form-group"><label>File CSV/TXT (opzionale)</label><input type="file" id="import-file" accept=".csv,.txt" onchange="leggiFilePersone(event)"></div>
+      <div class="form-group"><label>Righe da importare</label><textarea id="import-testo" rows="8" placeholder="Mario Rossi;Cap.;30&#10;Luca Bianchi;App.;28"></textarea></div>
+      <label style="display:flex;gap:8px;align-items:center;font-weight:400"><input type="checkbox" id="import-saltaDuplicati" checked> Salta nomi già presenti</label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-import-persone')">Annulla</button>
+      <button class="btn btn-primary btn-sm" onclick="importaPersone()">Importa</button>
     </div>
   </div>
 </div>
@@ -706,6 +851,7 @@ tr:hover td{background:var(--surface2)}
     <a href="#" data-section="agenda"><span class="icon">📋</span>Agenda</a>
     <a href="#" data-section="notifiche"><span class="icon">🔔</span>Notifiche</a>
     <a href="#" data-section="manutenzione"><span class="icon">🔧</span>Manutenzione</a>
+    <a href="#" data-section="sistema"><span class="icon">🛡️</span>Sistema</a>
   </div>
 </nav>
 
@@ -719,6 +865,7 @@ tr:hover td{background:var(--surface2)}
 <script type="module" src="agenda.js"></script>
 <script type="module" src="notifiche.js"></script>
 <script type="module" src="manutenzione.js"></script>
+<script type="module" src="sistema.js"></script>
 
 </body>
 </html>

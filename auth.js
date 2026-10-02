@@ -5,8 +5,6 @@ import {
   doc, getDoc
 } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
 
-const ALLOWED_EMAIL = "emanuele.dileo28@gmail.com";
-
 // usa window._auth e window._db impostati da firebase.js
 const auth = window._auth;
 const db = window._db;
@@ -20,6 +18,8 @@ function showLogin(err = '') {
 function showApp(user, data) {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
+  // memorizza l'admin loggato (serve per regole di trasferimento ecc.)
+  window.AdminState.currentUser = { uid: user.uid, email: user.email, ...data };
   document.getElementById('sidebar-user').textContent = `${data.grado || ''} ${data.nome || ''} ${data.cognome || ''}`.trim() || user.email;
   window.initApp && window.initApp();
 }
@@ -43,7 +43,7 @@ window.doLogin = async function() {
   const pass = document.getElementById('login-password').value;
   const errEl = document.getElementById('login-err');
   errEl.textContent = '';
-  if (email !== ALLOWED_EMAIL) { errEl.textContent = 'Email non autorizzata.'; return; }
+  if (!email) { errEl.textContent = 'Inserisci una email.'; return; }
   try {
     await signInWithEmailAndPassword(auth, email, pass);
   } catch (e) {
